@@ -4,6 +4,9 @@ spring:
       auto-index-creation: true
   mongodb:
     uri: mongodb://admin:password@localhost:27017/aiagent?authSource=admin
+    #run this in docker mongo comtainer's exec tab :
+    #mongosh -u admin -p password -authenticationDatabase admin
+
 
 logging:
   level:
