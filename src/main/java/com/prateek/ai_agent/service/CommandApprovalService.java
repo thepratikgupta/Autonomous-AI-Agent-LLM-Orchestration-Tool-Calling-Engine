@@ -14,7 +14,7 @@ import java.util.List;
 public class CommandApprovalService {
 
     private final CommandRequestRepository repository;
-    private final ToolService toolService;
+    private final AdminToolService adminToolService;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -90,7 +90,7 @@ public class CommandApprovalService {
             );
 
             //String output = toolService.executeToolCall("Bash", toolArgs);
-            String output = toolService.executeApprovedCommand(request.getCommand());
+            String output = adminToolService.executeApprovedCommand(request.getCommand());
             request.setOutput(output);
             request.setExecutedAt(Instant.now());
             request.setStatus("EXECUTED");

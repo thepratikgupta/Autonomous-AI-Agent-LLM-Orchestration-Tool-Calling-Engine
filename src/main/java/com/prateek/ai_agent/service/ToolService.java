@@ -31,6 +31,7 @@ public class ToolService {
     private final FileService fileService;
     private final AuditService auditService;
     private final ExecutorService executor;
+    private final CommandApprovalService commandApprovalService;
 
     //TOOL DEFINITIONS :
 //    public ChatCompletionTool buildReadToolDefinition() {
@@ -307,7 +308,8 @@ public ChatCompletionTool buildBashToolDefinition() {
             return "Blocked: command too long.";
         }
         if(!isSafeCommand(cmd)){
-            return "Not a safe command.";
+            commandApprovalService.submitCommand("user123",cmd);
+            return "Not a safe command, sent for approval.";
         }
 
 //        if (cmd.contains("&&") || cmd.contains("|") || cmd.contains(";")) {
@@ -377,7 +379,7 @@ public ChatCompletionTool buildBashToolDefinition() {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "Execution error";
+            return "[Execution error from Tool Service.]";
         }
     }
 
