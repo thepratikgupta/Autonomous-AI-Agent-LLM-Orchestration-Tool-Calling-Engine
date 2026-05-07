@@ -1,0 +1,322 @@
+package com.prateek.ai_agent.service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openai.core.JsonValue;
+import com.openai.models.FunctionDefinition;
+import com.openai.models.FunctionParameters;
+import com.openai.models.chat.completions.ChatCompletionTool;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
+
+import static com.prateek.ai_agent.service.FileService.ROOT;
+
+@Service
+@RequiredArgsConstructor
+public class ToolService {
+    //if some issue, reimport objectMapper
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private static final List<String> ALLOWED_COMMANDS = List.of(
+            "dir", "echo", "type"
+    );
+    private final FileService fileService;
+    private final AuditService auditService;
+    private final ExecutorService executor;
+    // TOOL DEFINITIONS :
+
+    public ChatCompletionTool buildReadToolDefinition() {
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("Read")
+                        .description("Read and return file contents")
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty("type", JsonValue.from("object"))
+                                .putAdditionalProperty("properties", JsonValue.from(Map.of(
+                                        "file_path", Map.of(
+                                                "type", "string",
+                                                "description", "The path"
+                                                        + " to the"
+                                                        + " file"
+                                                        + " to read"))))
+                                .putAdditionalProperty("required", JsonValue.from(List.of("file_path")))
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildWriteToolDefinition() {
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("Write")
+                        .description("Write content to file")
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty("type", JsonValue.from("object"))
+                                .putAdditionalProperty("properties", JsonValue.from(Map.of(
+                                        "file_path", Map.of(
+                                                "type", "string",
+                                                "description",  "The path"
+                                                        + " of the"
+                                                        + " file"
+                                                        + " to write"
+                                                        + " to"
+                                        ),
+                                        "content", Map.of(
+                                                "type", "string",
+                                                "description", "The content"
+                                                        + " to write"
+                                                        + " to the"
+                                                        + " file"
+                                        )
+                                )))
+                                .putAdditionalProperty("required", JsonValue.from(List.of("file_path", "content")))
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildBashToolDefinition() {
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("Bash")
+                        .description("Execute shell command")
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty("type", JsonValue.from("object"))
+                                .putAdditionalProperty("properties", JsonValue.from(Map.of(
+                                        "command", Map.of(
+                                                "type", "string",
+                                                "description", "The command"
+                                                        + " to execute"
+                                        )
+                                )))
+                                .putAdditionalProperty("required", JsonValue.from(List.of("command")))
+                                .build())
+                        .build())
+                .build();
+    }
+
+    // ================= EXECUTION =================
+
+    public String executeToolCall(String name, String args) {
+        String result;
+        String status = "SUCCESS";
+        long start = System.currentTimeMillis();
+        String user = "default-user"; // replace with real user later
+        try{
+            switch (name) {
+                case "Read":
+                    result= readFile(extract(args, "file_path"));
+                    break;
+                case "Write":
+                    writeFile(extract(args, "file_path"), extract(args, "content"));
+                    result= "Write successful";
+                    break;
+                case "Bash":
+                    result= executeCommand(extract(args, "command"));
+                    break;
+                default:
+                    throw new RuntimeException("Unknown tool: " + name);
+            }
+        }catch(Exception e){
+            result = "Error: " + e.getMessage();
+            status = "FAIL";
+        }
+        long timeTaken = System.currentTimeMillis() - start;
+        //String ip ="TO DO-currently in toolService";
+        auditService.log(user, name + ":" + args, status, timeTaken, result);
+        return result;
+    }
+
+    // ================= HELPERS =================
+
+    private String extract(String json, String field) {
+        try {
+            var node = OBJECT_MAPPER.readTree(json);
+
+            var valueNode = node.get(field);
+            if (valueNode == null || valueNode.isNull()) {
+                throw new RuntimeException("Missing field: " + field);
+            }
+
+            String value = valueNode.asText();
+            if (value.isBlank()) {
+                throw new RuntimeException("Empty field: " + field);
+            }
+
+            return value;
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid tool arguments", e);
+        }
+    }
+
+//    private String readFile(String path) {
+//        try {
+//            return Files.readString(Path.of(path));
+//        } catch (IOException e) {
+//            return "Error reading file";
+//        }
+//    }
+    private String readFile(String path) {
+        Path verifiedPath = fileService.getSafeReadPath(path);
+        try {
+            return Files.readString(verifiedPath);
+        } catch (IOException e) {
+            return "Error reading file";
+        }
+    }
+
+//    private void writeFile(String path, String content) {
+//
+//        try {
+//            Path p = Path.of(path);
+//            if (p.getParent() != null) Files.createDirectories(p.getParent());
+//            Files.writeString(p, content);
+//        } catch (IOException e) {
+//            throw new RuntimeException("Write failed");
+//        }
+//    }
+    private void writeFile(String path, String content) {
+        Path verifiedPath = fileService.getSafeWritePath(path);
+        try {
+            //Path p = Path.of(path);
+            if (verifiedPath.getParent() != null) Files.createDirectories(verifiedPath.getParent()); //creates the full folder structure if missing  does nothing if it already exists (safe)
+            Files.writeString(verifiedPath, content); //creates file if not exists and overwrites if exists
+        } catch (IOException e) {
+            throw new RuntimeException("Write failed");
+        }
+    }
+
+//    private boolean isAllowed(String cmd) {
+//        String base = cmd.split(" ")[0].toLowerCase();
+//        return ALLOWED_COMMANDS.contains(base);
+//    }
+
+    private static final long COMMAND_TIMEOUT_SECONDS = 10;
+    //private static final ExecutorService executor = Executors.newFixedThreadPool(5); //5 command output can be read at a time
+    private String executeCommand(String cmd) {
+
+        if (cmd == null || cmd.isBlank()) {
+            return "Empty command";
+        }
+        if (cmd.length() > 200) {
+            return "Blocked: command too long";
+        }
+
+        if (cmd.contains("&&") || cmd.contains("|") || cmd.contains(";")) {
+            return "Blocked: chained commands";
+        }
+        if (cmd.contains(">") || cmd.contains("<")) {
+            return "Blocked: redirection not allowed";
+        }
+
+
+
+        //I know only isAllowed commands will be executed but still checking
+        //just doing this to block obvious dangerous keywords
+        String lower = cmd.toLowerCase();
+        if (lower.contains("del ") || lower.contains("format") || lower.contains("shutdown")) {
+            return "Blocked: dangerous command";
+        }
+
+        try {
+            String[] parts = cmd.trim().split("\\s+");
+            String base = parts[0].toLowerCase();
+
+            if (!ALLOWED_COMMANDS.contains(base)) {
+                return "Blocked: not allowed";
+            }
+            if (!validateArguments(base, parts)) {
+                return "Blocked: invalid arguments";
+            }
+            if (parts.length > 3) {
+                return "Blocked: too many arguments";
+            }
+            Process p = new ProcessBuilder("cmd.exe", "/c", cmd)
+                    .directory(ROOT.toFile()) // important, directory expects file and not a path
+                    .redirectErrorStream(true)
+                    .start();
+
+            //String output = new String(p.getInputStream().readAllBytes());
+            //int code = p.waitFor(); //No timeout → returns int
+
+            InputStream is = p.getInputStream();
+
+            Future<String> futureOutput = executor.submit(() ->
+                    new String(is.readAllBytes())
+            );
+
+            boolean finished = p.waitFor(COMMAND_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS); //With timeout → returns boolean
+            //Never call waitFor() without draining the process output concurrently.
+            if (!finished) {
+                p.destroyForcibly();  //request termination
+                p.waitFor(); //confirms full termination
+                futureOutput.cancel(true); // stop reader thread
+                return "Command timed out after " + COMMAND_TIMEOUT_SECONDS + " seconds";
+            }
+            //String output = futureOutput.get();
+            //String output = new String(p.getInputStream().readAllBytes());
+
+            String output;
+            try {
+                output = futureOutput.get(2, TimeUnit.SECONDS);//Output is already generated, You are just reading remaining buffered data.If it takes long → something is wrong
+            } catch (TimeoutException e) {
+                futureOutput.cancel(true); // stop reader thread
+                //Killing the process does NOT stop the thread reading its output.
+                //You must explicitly cancel the Future to stop that background thread.
+                return "Output read timeout";
+            }
+
+
+            int code = p.exitValue();
+            return code == 0 ? output : "Failed (" + code + "): " + output;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Execution error";
+        }
+    }
+
+    private boolean validateArguments(String base, String[] parts) {
+
+        switch (base) {
+
+            case "echo":
+                return true; // no validation needed
+
+            case "type":
+            case "dir":
+                for (int i = 1; i < parts.length; i++) {
+                    if (!isSafePath(parts[i]) || parts[i].startsWith("/")) return false;
+                }
+                return true;
+
+            default:
+                return false;
+        }
+    }
+    private boolean isSafePath(String arg) {
+
+        if (arg.matches("^[a-zA-Z]:\\\\.*")) return false;
+        if (arg.contains("..")) return false;
+        if (arg.startsWith("\\\\")) return false;
+
+        try {
+            fileService.getSafeReadPath(arg);
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
+    }
+
+}
