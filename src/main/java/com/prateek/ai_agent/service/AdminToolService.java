@@ -1,5 +1,8 @@
 package com.prateek.ai_agent.service;
 
+import com.prateek.ai_agent.entity.RoleType;
+import com.prateek.ai_agent.entity.User;
+import com.prateek.ai_agent.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,8 @@ import static com.prateek.ai_agent.service.FileService.ROOT;
 public class AdminToolService {
     private final ExecutorService executor;
     private static final long COMMAND_TIMEOUT_SECONDS2 = 10;
+    private final UserRepository userRepository;
+
 
     protected String executeApprovedCommand(String cmd){
         try {
@@ -57,4 +62,17 @@ public class AdminToolService {
         }
     }
 
+
+    public User makeAdmin(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setRole(RoleType.ADMIN);
+//        //debugging
+//        System.out.println("Before: " + user.getRole());
+//        user.setRole(RoleType.ADMIN);
+//        User saved = userRepository.save(user);
+//        System.out.println("After: " + saved.getRole());
+//        //debugging
+        return userRepository.save(user);
+    }
 }

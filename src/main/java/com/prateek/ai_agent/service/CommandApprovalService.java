@@ -109,8 +109,7 @@ public class CommandApprovalService {
     // =========================
 
     public CommandRequest rejectCommand(String id,
-                                        String adminId,
-                                        String reason) {
+                                        String adminId,String reason) {
 
         CommandRequest request = getCommandById(id);
 

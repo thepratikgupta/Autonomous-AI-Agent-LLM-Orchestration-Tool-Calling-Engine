@@ -20,16 +20,16 @@ public class CommandApprovalController {
     // SUBMIT COMMAND
     // =========================
 
-    @PostMapping
-    public CommandRequest submitCommand(@RequestBody CommandSubmitRequestDto dto) {
-        //will replace later using JWT
-        String userId = "user123";
-
-        return commandApprovalService.submitCommand(
-                userId,
-                dto.getCommand()
-        );
-    }
+//    @PostMapping
+//    public CommandRequest submitCommand(@RequestBody CommandSubmitRequestDto dto) {
+//        //will replace later using JWT
+//        String userId = "user123";
+//
+//        return commandApprovalService.submitCommand(
+//                userId,
+//                dto.getCommand()
+//        );
+//    }
 
     // =========================
     // GET MY COMMANDS
@@ -79,6 +79,7 @@ public class CommandApprovalController {
         //admin will send request like this : POST /commands/abc123/reject
         //admin will also send JSON body : {"reason": "Dangerous filesystem access"}
     }
+
 
     // =========================
     // GET SINGLE COMMAND
