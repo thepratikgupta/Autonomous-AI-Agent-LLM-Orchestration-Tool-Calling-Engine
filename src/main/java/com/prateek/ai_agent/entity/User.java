@@ -27,10 +27,15 @@ public class User implements UserDetails {
     private String email;
     private String password;
     private String name;
+    @Builder.Default
+    private RoleType role=RoleType.CLIENT;;
 
-    private RoleType role;
-    //@Enumerated(EnumType.STRING)
-    //Set<RoleType> roles = new HashSet<>();
+//    @PrePersist
+//    public void prePersist() {
+//        if (role == null) {
+//            role = RoleType.CLIENT;
+//        }
+//    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -5,12 +5,16 @@ import com.openai.core.JsonValue;
 import com.openai.models.FunctionDefinition;
 import com.openai.models.FunctionParameters;
 import com.openai.models.chat.completions.ChatCompletionTool;
+import com.prateek.ai_agent.entity.*;
+import com.prateek.ai_agent.security.AuditorAwareImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.PathMatcher;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -32,41 +36,22 @@ public class ToolService {
     private final AuditService auditService;
     private final ExecutorService executor;
     private final CommandApprovalService commandApprovalService;
+    private final AuditorAwareImpl auditorAwareImpl;
+    private final FileMemoryService fileMemoryService;
+    private final WebSearchService webSearchService;
+    private final BrowserService browserService;
+    private final FileSnapshotService fileSnapshotService;
+    private final ToolDescriptionService toolDescriptionService;
+    private final ProjectScanService projectScanService;
+    private final ProjectIndexService projectIndexService;
+    private final ProjectSessionService projectSessionService;
 
-    //TOOL DEFINITIONS :
-//    public ChatCompletionTool buildReadToolDefinition() {
-//        return ChatCompletionTool.builder()
-//                .type(JsonValue.from("function"))
-//                .function(FunctionDefinition.builder()
-//                        .name("Read")
-//                        .description(
-//                                "Reads and returns the content of a file inside a restricted sandbox directory. " +
-//                                        "Only files within the sandbox root are accessible. " +
-//                                        "Absolute paths or directory traversal (.. or system paths) are not allowed."
-//                        )
-//                        .parameters(FunctionParameters.builder()
-//                                .putAdditionalProperty("type", JsonValue.from("object"))
-//                                .putAdditionalProperty("properties", JsonValue.from(Map.of(
-//                                        "file_path", Map.of(
-//                                                "type", "string",
-//                                                "description",
-//                                                "Relative path of the file inside sandbox. " +
-//                                                        "Example: notes.txt or logs/app.txt. " +
-//                                                        "Must NOT be absolute path or contain '..'."
-//                                        )
-//                                )))
-//                                .putAdditionalProperty("required",
-//                                        JsonValue.from(List.of("file_path")))
-//                                .build())
-//                        .build())
-//                .build();
-//    }
     public ChatCompletionTool buildReadToolDefinition() {
         return ChatCompletionTool.builder()
                 .type(JsonValue.from("function"))
                 .function(FunctionDefinition.builder()
                         .name("Read")
-                        .description("Read and return file contents")
+                        .description(toolDescriptionService.getDescriptionOfRead())
                         .parameters(FunctionParameters.builder()
                                 .putAdditionalProperty("type", JsonValue.from("object"))
                                 .putAdditionalProperty("properties", JsonValue.from(Map.of(
@@ -86,13 +71,7 @@ public class ToolService {
                 .type(JsonValue.from("function"))
                 .function(FunctionDefinition.builder()
                         .name("Write")
-                        .description(
-                                "Writes content to a file inside a restricted sandbox directory. " +
-                                        "If the file does not exist, it will be created. " +
-                                        "If it exists, it will be overwritten. " +
-                                        "All file paths are relative to sandbox root. " +
-                                        "Absolute paths or path traversal is not allowed."
-                        )
+                        .description(toolDescriptionService.getDescriptionOfWrite())
                         .parameters(FunctionParameters.builder()
                                 .putAdditionalProperty("type", JsonValue.from("object"))
                                 .putAdditionalProperty("properties", JsonValue.from(Map.of(
@@ -116,68 +95,13 @@ public class ToolService {
                         .build())
                 .build();
     }
-//    public ChatCompletionTool buildWriteToolDefinition() {
-//        return ChatCompletionTool.builder()
-//                .type(JsonValue.from("function"))
-//                .function(FunctionDefinition.builder()
-//                        .name("Write")
-//                        .description("Write content to file")
-//                        .parameters(FunctionParameters.builder()
-//                                .putAdditionalProperty("type", JsonValue.from("object"))
-//                                .putAdditionalProperty("properties", JsonValue.from(Map.of(
-//                                        "file_path", Map.of(
-//                                                "type", "string",
-//                                                "description",  "The path"
-//                                                        + " of the"
-//                                                        + " file"
-//                                                        + " to write"
-//                                                        + " to"
-//                                        ),
-//                                        "content", Map.of(
-//                                                "type", "string",
-//                                                "description", "The content"
-//                                                        + " to write"
-//                                                        + " to the"
-//                                                        + " file"
-//                                        )
-//                                )))
-//                                .putAdditionalProperty("required", JsonValue.from(List.of("file_path", "content")))
-//                                .build())
-//                        .build())
-//                .build();
-//    }
 
-//    public ChatCompletionTool buildBashToolDefinition() {
-//        return ChatCompletionTool.builder()
-//                .type(JsonValue.from("function"))
-//                .function(FunctionDefinition.builder()
-//                        .name("Bash")
-//                        .description("Execute shell command")
-//                        .parameters(FunctionParameters.builder()
-//                                .putAdditionalProperty("type", JsonValue.from("object"))
-//                                .putAdditionalProperty("properties", JsonValue.from(Map.of(
-//                                        "command", Map.of(
-//                                                "type", "string",
-//                                                "description", "The command"
-//                                                        + " to execute"
-//                                        )
-//                                )))
-//                                .putAdditionalProperty("required", JsonValue.from(List.of("command")))
-//                                .build())
-//                        .build())
-//                .build();
-//    }
 public ChatCompletionTool buildBashToolDefinition() {
     return ChatCompletionTool.builder()
             .type(JsonValue.from("function"))
             .function(FunctionDefinition.builder()
                     .name("Bash")
-                    .description(
-                            "Execute a SINGLE Windows CMD command. " +
-                                    "Return ONLY the raw command without quotes or formatting. " +
-                                    "Do NOT wrap command in quotes. " +
-                                    "Examples: dir, type file.txt, echo hello"
-                    )
+                    .description(toolDescriptionService.getDescriptionOfBash())
                     .parameters(FunctionParameters.builder()
                             .putAdditionalProperty("type", JsonValue.from("object"))
                             .putAdditionalProperty("properties", JsonValue.from(Map.of(
@@ -194,13 +118,533 @@ public ChatCompletionTool buildBashToolDefinition() {
                     .build())
             .build();
 }
+//ADDITIONAL TOOLS START:
+
+    public ChatCompletionTool buildListFilesToolDefinition() {
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("ListFiles")
+                        .description(toolDescriptionService.getDescriptionOfListFiles())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty(
+                                        "type",
+                                        JsonValue.from("object")
+                                )
+                                .putAdditionalProperty(
+                                        "properties",
+                                        JsonValue.from(Map.of(
+                                                "directory",
+                                                Map.of(
+                                                        "type",
+                                                        "string",
+                                                        "description",
+                                                        "Relative directory path. Use empty string for sandbox root."
+                                                )
+                                        ))
+                                )
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildCreateDirectoryToolDefinition() {
+
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("CreateDirectory")
+                        .description(toolDescriptionService.getDescriptionOfCreateDirectory())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty(
+                                        "type",
+                                        JsonValue.from("object")
+                                )
+                                .putAdditionalProperty(
+                                        "properties",
+                                        JsonValue.from(Map.of(
+                                                "directory",
+                                                Map.of(
+                                                        "type",
+                                                        "string",
+                                                        "description",
+                                                        "Directory path to create."
+                                                )
+                                        ))
+                                )
+                                .putAdditionalProperty(
+                                        "required",
+                                        JsonValue.from(List.of("directory"))
+                                )
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildRenameFileToolDefinition() {
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("RenameFile")
+                        .description(toolDescriptionService.getDescriptionOfRenameFile())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty(
+                                        "type",
+                                        JsonValue.from("object")
+                                )
+                                .putAdditionalProperty(
+                                        "properties",
+                                        JsonValue.from(Map.of(
+                                                "old_name",
+                                                Map.of(
+                                                        "type",
+                                                        "string"
+                                                ),
+                                                "new_name",
+                                                Map.of(
+                                                        "type",
+                                                        "string"
+                                                )
+                                        ))
+                                )
+                                .putAdditionalProperty(
+                                        "required",
+                                        JsonValue.from(
+                                                List.of(
+                                                        "old_name",
+                                                        "new_name"
+                                                )
+                                        )
+                                )
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildGetFileInfoToolDefinition() {
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("GetFileInfo")
+                        .description(toolDescriptionService.getDescriptionOfGetFileInfo())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty(
+                                        "type",
+                                        JsonValue.from("object")
+                                )
+                                .putAdditionalProperty(
+                                        "properties",
+                                        JsonValue.from(Map.of(
+                                                "file_path",
+                                                Map.of(
+                                                        "type",
+                                                        "string",
+                                                        "description",
+                                                        "Relative file path inside sandbox."
+                                                )
+                                        ))
+                                )
+                                .putAdditionalProperty(
+                                        "required",
+                                        JsonValue.from(List.of("file_path"))
+                                )
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildSearchFilesToolDefinition() {
+
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("SearchFiles")
+                        .description(toolDescriptionService.getDescriptionOfSearchFiles())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty(
+                                        "type",
+                                        JsonValue.from("object")
+                                )
+                                .putAdditionalProperty(
+                                        "properties",
+                                        JsonValue.from(Map.of(
+                                                "pattern",
+                                                Map.of(
+                                                        "type",
+                                                        "string",
+                                                        "description",
+                                                        "Examples: *.java, *.txt, config"
+                                                )
+                                        ))
+                                )
+                                .putAdditionalProperty(
+                                        "required",
+                                        JsonValue.from(List.of("pattern"))
+                                )
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildMoveFileToolDefinition() {
+
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("MoveFile")
+                        .description(toolDescriptionService.getDescriptionOfMoveFile())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty(
+                                        "type",
+                                        JsonValue.from("object")
+                                )
+                                .putAdditionalProperty(
+                                        "properties",
+                                        JsonValue.from(Map.of(
+                                                "source",
+                                                Map.of(
+                                                        "type",
+                                                        "string"
+                                                ),
+                                                "destination",
+                                                Map.of(
+                                                        "type",
+                                                        "string"
+                                                )
+                                        ))
+                                )
+                                .putAdditionalProperty(
+                                        "required",
+                                        JsonValue.from(
+                                                List.of(
+                                                        "source",
+                                                        "destination"
+                                                )
+                                        )
+                                )
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildReadMultipleFilesToolDefinition() {
+
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("ReadMultipleFiles")
+                        .description(toolDescriptionService.getDescriptionOfReadMultipleFiles())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty(
+                                        "type",
+                                        JsonValue.from("object")
+                                )
+                                .putAdditionalProperty(
+                                        "properties",
+                                        JsonValue.from(Map.of(
+                                                "file_paths",
+                                                Map.of(
+                                                        "type",
+                                                        "array",
+                                                        "items",
+                                                        Map.of(
+                                                                "type",
+                                                                "string"
+                                                        )
+                                                )
+                                        ))
+                                )
+                                .putAdditionalProperty(
+                                        "required",
+                                        JsonValue.from(
+                                                List.of("file_paths")
+                                        )
+                                )
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildApplyPatchFileToolDefinition() {
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("ApplyPatchFile")
+                        .description(toolDescriptionService.getDescriptionOfApplyPatchFile())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty("type", JsonValue.from("object"))
+                                .putAdditionalProperty("properties", JsonValue.from(Map.of(
+                                        "file_path", Map.of(
+                                                "type", "string",
+                                                "description", "File to modify"
+                                        ),
+                                        "operation", Map.of(
+                                                "type", "string",
+                                                "enum", List.of(
+                                                        "REPLACE",
+                                                        "INSERT_AFTER",
+                                                        "INSERT_BEFORE",
+                                                        "DELETE"
+                                                )
+                                        ),
+                                        "target", Map.of(
+                                                "type", "string",
+                                                "description", "Exact text to match in file"
+                                        ),
+                                        "content", Map.of(
+                                                "type", "string",
+                                                "description", "Replacement or inserted content"
+                                        )
+                                )))
+                                .putAdditionalProperty("required",
+                                        JsonValue.from(List.of(
+                                                "file_path",
+                                                "operation",
+                                                "target"
+                                        )))
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildWebSearchToolDefinition() {
+
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("WebSearch")
+                        .description(toolDescriptionService.getDescriptionOfWebSearch())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty("type", JsonValue.from("object"))
+                                .putAdditionalProperty("properties", JsonValue.from(
+                                        Map.of(
+                                                "query", Map.of(
+                                                        "type", "string",
+                                                        "description", "Search query"
+                                                )
+                                        )
+                                ))
+                                .putAdditionalProperty("required",
+                                        JsonValue.from(List.of("query")))
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildBrowserToolDefinition() {
+
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("OpenWebPage")
+                        .description(toolDescriptionService.getDescriptionOfOpenWebPage())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty("type", JsonValue.from("object"))
+                                .putAdditionalProperty("properties", JsonValue.from(
+                                        Map.of(
+                                                "url", Map.of(
+                                                        "type", "string",
+                                                        "description", "Web page URL"
+                                                )
+                                        )
+                                ))
+                                .putAdditionalProperty("required",
+                                        JsonValue.from(List.of("url")))
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildDirectoryTreeToolDefinition() {
+
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(
+                        FunctionDefinition.builder()
+                                .name("DirectoryTree")
+                                .description(toolDescriptionService.getDescriptionOfDirectoryTree())
+                                .parameters(
+                                        FunctionParameters.builder()
+                                                .putAdditionalProperty(
+                                                        "type",
+                                                        JsonValue.from("object")
+                                                )
+                                                .putAdditionalProperty(
+                                                        "properties",
+                                                        JsonValue.from(
+                                                                Map.of(
+                                                                        "path",
+                                                                        Map.of(
+                                                                                "type",
+                                                                                "string",
+                                                                                "description",
+                                                                                "Relative folder path inside sandbox. Leave empty to scan entire sandbox"
+                                                                        )
+                                                                )
+                                                        )
+                                                )
+                                                .build()
+                                )
+                                .build()
+                )
+                .build();
+    }
+
+    public ChatCompletionTool buildRollbackToolDefinition() {
+
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(
+                        FunctionDefinition.builder()
+                                .name("RollbackFile")
+                                .description(toolDescriptionService.getDescriptionOfRollbackFile())
+                                .parameters(
+                                        FunctionParameters.builder()
+                                                .putAdditionalProperty(
+                                                        "type",
+                                                        JsonValue.from("object")
+                                                )
+                                                .putAdditionalProperty(
+                                                        "properties",
+                                                        JsonValue.from(
+                                                                Map.of(
+                                                                        "file_path",
+                                                                        Map.of(
+                                                                                "type",
+                                                                                "string"
+                                                                        )
+                                                                )
+                                                        )
+                                                )
+                                                .putAdditionalProperty(
+                                                        "required",
+                                                        JsonValue.from(
+                                                                List.of(
+                                                                        "file_path"
+                                                                )
+                                                        )
+                                                )
+                                                .build()
+                                )
+                                .build()
+                )
+                .build();
+    }
+
+    public ChatCompletionTool buildIndexProjectToolDefinition() {
+
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("IndexProject")
+                        .description(toolDescriptionService.getDescriptionOfIndexProject())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty("type", JsonValue.from("object"))
+                                .putAdditionalProperty("properties", JsonValue.from(Map.of(
+                                        "project_id", Map.of(
+                                                "type", "string",
+                                                "description", "Unique project id"
+                                        ),
+                                        "root_path", Map.of(
+                                                "type", "string",
+                                                "description", "Root folder path of project"
+                                        )
+                                )))
+                                .putAdditionalProperty(
+                                        "required",
+                                        JsonValue.from(List.of("project_id", "root_path"))
+                                )
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildFindClassToolDefinition() {
+
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(FunctionDefinition.builder()
+                        .name("FindClass")
+                        .description(toolDescriptionService.getDescriptionOfFindClass())
+                        .parameters(FunctionParameters.builder()
+                                .putAdditionalProperty("type", JsonValue.from("object"))
+                                .putAdditionalProperty("properties", JsonValue.from(Map.of(
+                                        "project_id", Map.of(
+                                                "type", "string"
+                                        ),
+                                        "class_name", Map.of(
+                                                "type", "string"
+                                        )
+                                )))
+                                .putAdditionalProperty(
+                                        "required",
+                                        JsonValue.from(List.of("project_id", "class_name"))
+                                )
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public ChatCompletionTool buildFindMethodToolDefinition() {
+
+        return ChatCompletionTool.builder()
+                .type(JsonValue.from("function"))
+                .function(
+                        FunctionDefinition.builder()
+                                .name("FindMethod")
+                                .description(
+                                        toolDescriptionService
+                                                .getDescriptionOfFindMethod()
+                                )
+                                .parameters(
+                                        FunctionParameters.builder()
+                                                .putAdditionalProperty(
+                                                        "type",
+                                                        JsonValue.from("object")
+                                                )
+                                                .putAdditionalProperty(
+                                                        "properties",
+                                                        JsonValue.from(
+                                                                Map.of(
+                                                                        "project_id",
+                                                                        Map.of(
+                                                                                "type",
+                                                                                "string"
+                                                                        ),
+                                                                        "method_name",
+                                                                        Map.of(
+                                                                                "type",
+                                                                                "string"
+                                                                        )
+                                                                )
+                                                        )
+                                                )
+                                                .putAdditionalProperty(
+                                                        "required",
+                                                        JsonValue.from(
+                                                                List.of(
+                                                                        "project_id",
+                                                                        "method_name"
+                                                                )
+                                                        )
+                                                )
+                                                .build()
+                                )
+                                .build()
+                )
+                .build();
+    }
+
+//ADDITIONAL TOOLS END.
 
     //EXECUTION:
     public String executeToolCall(String name, String args) {
         String result;
         String status = "SUCCESS";
         long start = System.currentTimeMillis();
-        String user = "default-user"; // replace with real user later
+        String user = auditorAwareImpl
+                .getCurrentAuditor()
+                .orElse("anonymous");
         try{
             switch (name) {
                 case "Read":
@@ -209,6 +653,94 @@ public ChatCompletionTool buildBashToolDefinition() {
                 case "Write":
                     writeFile(extract(args, "file_path"), extract(args, "content"));
                     result= "Write successful";
+                    break;
+                case "ListFiles":
+                    result = listFiles(extract(args, "directory"));
+                    break;
+                case "CreateDirectory":
+                    createDirectory(extract(args, "directory"));
+                    result = "Directory created successfully";
+                    break;
+                case "RenameFile":
+                    renameFile(
+                            extract(args, "old_name"),
+                            extract(args, "new_name")
+                    );
+                    result = "Rename successful";
+                    break;
+                case "GetFileInfo":
+                    result = getFileInfo(extract(args, "file_path"));
+                    break;
+                case "SearchFiles":
+                    result = searchFiles(extract(args, "pattern"));
+                    break;
+                case "MoveFile":
+                    moveFile(
+                            extract(args, "source"),
+                            extract(args, "destination")
+                    );
+                    result = "File moved successfully";
+                    break;
+                case "ReadMultipleFiles":
+                    result =
+                            readMultipleFiles(
+                                    extractStringList(
+                                            args,
+                                            "file_paths"
+                                    )
+                            );
+                    break;
+                case "ApplyPatchFile":
+                    result = applyPatchFile(
+                            extract(args, "file_path"),
+                            extract(args, "operation"),
+                            extract(args, "target"),
+                            extractOptional(args, "content")
+                    );
+                    break;
+                case "WebSearch":
+                    String query = extract(args, "query");
+                    result = webSearch(query);
+                    break;
+                case "OpenWebPage":
+                    result = browserService.openUrl(
+                            extract(args, "url")
+                    );
+                    break;
+                case "DirectoryTree":
+                    result = directoryTree(
+                            extractOptional(args, "path")
+                    );
+                    break;
+                case "RollbackFile":
+                    result = rollbackFile(
+                            extract(args, "file_path")
+                    );
+                    break;
+                case "IndexProject":
+                    String projectId = extract(args, "project_id");
+                    String rootPath = extract(args, "root_path");
+                    projectScanService.scanProject(projectId, fileService.getSafeReadPath(rootPath));
+                    projectSessionService.setProject(projectId, rootPath);
+                    result = "Project indexed successfully";
+                    break;
+                case "FindClass":
+                    String pid = extract(args, "project_id");
+                    String className = extract(args, "class_name");
+                    result = projectIndexService
+                            .findClass(pid, className)
+                            .toString();
+                    break;
+                case "FindMethod":
+                    String project = extract(args, "project_id");
+                    String methodName = extract(args, "method_name");
+
+                    result = formatMethodSearch(
+                            projectIndexService.findMethod(
+                                    project,
+                                    methodName
+                            ),methodName
+                    );
                     break;
                 case "Bash":
                     String command = extract(args,"command");
@@ -222,10 +754,614 @@ public ChatCompletionTool buildBashToolDefinition() {
             status = "FAIL";
         }
         long timeTaken = System.currentTimeMillis() - start;
-        //String ip ="TO DO-currently in toolService";
         auditService.log(user, name + ":" + args, status, timeTaken, result);
         return result;
     }
+
+    //ADDITIONAL HELPERS:
+
+    private String formatMethodSearch(
+            List<ProjectIndex> indexes,String methodName
+    ) {
+
+        if (indexes.isEmpty()) {
+            return "Method not found.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        for (ProjectIndex index : indexes) {
+
+            sb.append("""
+                File: %s
+                Package: %s
+                """
+                    .formatted(
+                            index.getFilePath(),
+                            index.getPackageName()
+                    ));
+
+            if (index.getMethods() != null) {
+
+                index.getMethods()
+                        .stream()
+                        .filter(m ->
+                                m.getName()
+                                        .equalsIgnoreCase(methodName)
+                        )
+                        .forEach(method -> {
+                            sb.append("""
+                                
+                                Method: %s
+                                Return Type: %s
+                                Parameters: %s
+                                Line: %d
+                                Public: %s
+                                Static: %s
+                                """
+                                    .formatted(
+                                            method.getName(),
+                                            method.getReturnType(),
+                                            method.getParameters(),
+                                            method.getLineNumber(),
+                                            method.isPublic(),
+                                            method.isStatic()
+                                    ));
+                        });
+//                index.getMethods()
+//                        .forEach(method -> {
+//
+//                            sb.append("""
+//
+//                                Method: %s
+//                                Return Type: %s
+//                                Parameters: %s
+//                                Line: %d
+//                                Public: %s
+//                                Static: %s
+//                                """
+//                                    .formatted(
+//                                            method.getName(),
+//                                            method.getReturnType(),
+//                                            method.getParameters(),
+//                                            method.getLineNumber(),
+//                                            method.isPublic(),
+//                                            method.isStatic()
+//                                    ));
+//                        });
+            }
+
+            sb.append("\n-----------------\n");
+        }
+
+        return sb.toString();
+    }
+
+    private String webSearch(String query) {
+
+        List<SearchResult> results = webSearchService.search(query);
+
+        if (results.isEmpty()) {
+            return "No results.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        for (SearchResult r : results) {
+
+            sb.append("""
+            Search Result: #%d
+            Title: %s
+            URL: %s
+            Snippet: %s
+
+            Use OpenWebPage on this URL if needed.
+            ------------------------------------
+
+            """.formatted(
+                    r.getRank(),
+                    r.getTitle(),
+                    r.getUrl(),
+                    r.getSnippet()
+            ));
+        }
+
+        return sb.toString();
+    }
+
+    private String extractOptional(String json, String field) {
+        try {
+            var node = OBJECT_MAPPER.readTree(json);
+
+            var valueNode = node.get(field);
+
+            if (valueNode == null || valueNode.isNull()) {
+                return "";
+            }
+
+            return valueNode.asText();
+
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private String listFiles(String directory) {
+
+        try {
+            Path dir;
+            if (directory == null || directory.isBlank()) {
+                dir = ROOT;
+            } else {
+                dir = fileService.getSafeReadPath(directory);
+            }
+            if (!Files.isDirectory(dir)) {
+                return "Not a directory";
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            try (var stream = Files.list(dir)) {
+                stream.forEach(path -> {
+                    if (Files.isDirectory(path)) {
+                        sb.append("[DIR] ");
+                    } else {
+                        sb.append("[FILE] ");
+                    }
+
+                    sb.append(path.getFileName())
+                            .append("\n");
+                });
+            }
+
+            return sb.toString();
+
+        } catch (Exception e) {
+            return "Failed to list files";
+        }
+    }
+
+    private void createDirectory(String directory) {
+
+        try {
+            Path path =
+                    fileService.getSafeWritePath(directory);
+            Files.createDirectories(path);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Unable to create directory"
+            );
+        }
+    }
+
+    private void renameFile(String oldName, String newName) {
+
+        try {
+
+            Path source = fileService.getSafeReadPath(oldName);
+
+            fileSnapshotService.createSnapshot(source.toString());
+
+            Path target = source.resolveSibling(newName);
+            Files.move(source, target);
+
+            FileContext ctx = fileMemoryService.get();
+            fileMemoryService.update(ctx);
+
+            ProjectSession session = projectSessionService.getProject();
+
+            if (session != null) {
+
+                Path projectRoot =
+                        FileService.ROOT.resolve(
+                                session.getRootPath()
+                        );
+
+                if (source.startsWith(projectRoot)) {
+
+                    String oldRelativePath =
+                            projectRoot
+                                    .relativize(source)
+                                    .toString();
+
+                    String newRelativePath =
+                            projectRoot
+                                    .relativize(target)
+                                    .toString();
+
+                    projectIndexService.updateFilePath(
+                            session.getProjectId(),
+                            oldRelativePath,
+                            newRelativePath
+                    );
+
+                }
+            }
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(
+                    "Rename failed"
+            );
+        }
+    }
+
+    private String getFileInfo(String filePath) {
+
+        try {
+            Path path = fileService.getSafeReadPath(filePath);
+
+            FileContext ctx = fileMemoryService.get();
+            ctx.setLastOpenedFile(path.toString());
+            ctx.getRecentFiles().add(path.toString());
+
+            fileMemoryService.update(ctx);
+
+            var attrs = Files.readAttributes(
+                            path,
+                            java.nio.file.attribute.BasicFileAttributes.class
+                    );
+
+            return """
+                File: %s
+                Size: %d bytes
+                Created: %s
+                Modified: %s
+                Directory: %s
+                """
+                    .formatted(
+                            path.getFileName(),
+                            attrs.size(),
+                            attrs.creationTime(),
+                            attrs.lastModifiedTime(),
+                            attrs.isDirectory()
+                    );
+
+        } catch (Exception e) {
+            return "Failed to get file info";
+        }
+    }
+
+    private String searchFiles(String pattern) {
+
+        try {
+
+            StringBuilder result = new StringBuilder();
+
+            PathMatcher matcher =
+                    FileSystems.getDefault()
+                            .getPathMatcher(
+                                    "glob:" + pattern
+                            );
+
+            try (var stream =
+                         Files.walk(ROOT)) {
+
+                stream.filter(Files::isRegularFile)
+                        .filter(path ->
+                                matcher.matches(
+                                        path.getFileName()
+                                )
+                        )
+                        .forEach(path ->
+                                result.append(
+                                                ROOT.relativize(path)
+                                        )
+                                        .append("\n")
+                        );
+            }
+
+            return result.isEmpty()
+                    ? "No files found"
+                    : result.toString();
+
+        } catch (Exception e) {
+
+            return "Search failed";
+        }
+    }
+
+    private void moveFile(
+            String source,
+            String destination
+    ) {
+
+        try {
+
+            Path src = fileService.getSafeReadPath(source);
+
+            Path dst = fileService.getSafeWritePath(destination);
+
+            FileContext ctx = fileMemoryService.get();
+            ctx.setLastOpenedFile(dst.toString());
+            ctx.getRecentFiles().add(dst.toString());
+            fileMemoryService.update(ctx);
+
+            fileSnapshotService.createSnapshot(src.toString());
+
+            if (dst.getParent() != null) {
+                Files.createDirectories(
+                        dst.getParent()
+                );
+            }
+
+            Files.move(
+                    src,
+                    dst,
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            );
+            ProjectSession session = projectSessionService.getProject();
+
+//            if (session != null) {
+//
+//                projectIndexService.deleteFile(
+//                        session.getProjectId(),
+//                        source
+//                );
+//
+//                String content = Files.readString(dst);
+//
+//                updateProjectIndex(
+//                        dst,
+//                        content
+//                );
+//            }
+            if (session != null &&
+                    session.getProjectId() != null) {
+
+                Path projectRoot = FileService.ROOT.resolve(
+                                session.getRootPath()
+                        );
+
+                if (src.startsWith(projectRoot)) {
+                    String oldRelativePath =
+                            projectRoot
+                                    .relativize(src)
+                                    .toString();
+
+                    String newRelativePath =
+                            projectRoot
+                                    .relativize(dst)
+                                    .toString();
+//                    projectIndexService.deleteFile(
+//                            session.getProjectId(),
+//                            oldRelativePath
+//                    );
+//
+//                    String content = Files.readString(dst);
+//
+//                    updateProjectIndex(
+//                            dst,
+//                            content
+//                    );
+                    projectIndexService.updateFilePath(
+                            session.getProjectId(),
+                            oldRelativePath,
+                            newRelativePath
+                    );
+                }
+            }
+
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(
+                    "Move failed"
+            );
+        }
+    }
+
+    private List<String> extractStringList(
+            String json,
+            String field
+    ) {
+
+        try {
+
+            var root =
+                    OBJECT_MAPPER.readTree(json);
+
+            var node =
+                    root.get(field);
+
+            if (node == null || !node.isArray()) {
+                throw new RuntimeException(
+                        "Expected array"
+                );
+            }
+
+            List<String> result =
+                    new java.util.ArrayList<>();
+
+            node.forEach(item ->
+                    result.add(item.asText())
+            );
+
+            return result;
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(
+                    "Invalid arguments"
+            );
+        }
+    }
+
+    private String readMultipleFiles(
+            List<String> filePaths
+    ) {
+
+        StringBuilder result = new StringBuilder();
+
+        for (String path : filePaths) {
+            FileContext ctx = fileMemoryService.get();
+
+            try {
+
+                Path file = fileService.getSafeReadPath(path);
+
+                ctx.setLastOpenedFile(file.toString());
+                ctx.getRecentFiles().add(file.toString());
+                fileMemoryService.update(ctx);
+
+                result.append(
+                                "\n===== "
+                        )
+                        .append(path)
+                        .append(
+                                " =====\n"
+                        );
+
+                result.append(
+                        Files.readString(file)
+                );
+
+                result.append("\n");
+
+            } catch (Exception e) {
+
+                result.append(
+                                "\nFailed: "
+                        )
+                        .append(path)
+                        .append("\n");
+            }
+        }
+
+        return result.toString();
+    }
+
+    private String applyPatchFile(
+            String filePath,
+            String operation,
+            String target,
+            String content
+    ) {
+
+        try {
+
+            Path path = fileService.getSafeReadPath(filePath);
+
+            FileContext ctx = fileMemoryService.get();
+            ctx.setLastOpenedFile(path.toString());
+            ctx.getRecentFiles().add(path.toString());
+            fileMemoryService.update(ctx);
+
+            fileSnapshotService.createSnapshot(path.toString());
+
+            String original = Files.readString(path);
+
+            String updated = switch (operation) {
+
+                case "REPLACE" -> {
+                    if (!original.contains(target)) {
+                        throw new RuntimeException("Target not found");
+                    }
+                    yield original.replace(target, content);
+                }
+
+                case "INSERT_AFTER" -> {
+                    int index = original.indexOf(target);
+                    if (index == -1) {
+                        throw new RuntimeException("Target not found");
+                    }
+
+                    int insertPos = index + target.length();
+
+                    yield original.substring(0, insertPos)
+                            + "\n" + content + "\n"
+                            + original.substring(insertPos);
+                }
+
+                case "INSERT_BEFORE" -> {
+                    int index = original.indexOf(target);
+                    if (index == -1) {
+                        throw new RuntimeException("Target not found");
+                    }
+
+                    yield original.substring(0, index)
+                            + content + "\n"
+                            + original.substring(index);
+                }
+
+                case "DELETE" -> {
+                    if (!original.contains(target)) {
+                        throw new RuntimeException("Target not found");
+                    }
+                    yield original.replace(target, "");
+                }
+
+                default -> throw new RuntimeException("Invalid operation");
+            };
+
+            Files.writeString(path, updated);
+            updateProjectIndex(
+                    path,
+                    updated
+            );
+
+            return "Patch applied successfully";
+
+        } catch (Exception e) {
+            return "Patch failed: " + e.getMessage();
+        }
+    }
+
+    private String directoryTree(String path) {
+
+        try {
+            Path root;
+
+            if (path == null || path.isBlank()) {
+                root = FileService.ROOT;
+            } else {
+                root = fileService.getSafeReadPath(path);
+            }
+            //Path root = fileService.getSafeReadPath(path);
+
+            StringBuilder result = new StringBuilder();
+
+            Files.walk(root).forEach(p -> {
+                        int level = root.relativize(p).getNameCount();
+
+                        result.append("  ".repeat(level))
+                                .append(p.getFileName())
+                                .append("\n");
+                        }
+            );
+
+            return result.toString();
+
+        } catch (Exception e) {
+
+            return "Directory tree failed: " + e.getMessage();
+        }
+    }
+
+    private String rollbackFile(String filePath) {
+
+        try {
+
+            FileSnapshot snapshot = fileSnapshotService.giveSnapshot(filePath);
+
+            if (snapshot == null) {
+                return "No snapshot found";
+            }
+
+            Files.writeString(
+                    fileService.getSafeWritePath(filePath),
+                    snapshot.getContent()
+            );
+
+            return "Rollback successful";
+
+        } catch (Exception e) {
+
+            return "Rollback failed: "
+                    + e.getMessage();
+        }
+    }
+    //ADDITIONAL HELPERS END.
 
     //HELPERS:
     private String extract(String json, String field) {
@@ -267,31 +1403,51 @@ public ChatCompletionTool buildBashToolDefinition() {
                 && !cmd.contains(">")
                 && !cmd.contains("<")
                 && !cmd.toLowerCase().contains("shutdown");
-        //return ALLOWED_COMMANDS.contains(base);
     }
 
     private String readFile(String path) {
         Path verifiedPath = fileService.getSafeReadPath(path);
+
+        FileContext ctx = fileMemoryService.get();
+        ctx.setLastOpenedFile(verifiedPath.toString());
+        ctx.getRecentFiles().add(verifiedPath.toString());
+        fileMemoryService.update(ctx);
+
+        //fileSnapshotService.createSnapshot(verifiedPath.toString());
+
         try {
             return Files.readString(verifiedPath);
         } catch (IOException e) {
             return "Error reading file";
         }
+
     }
 
     private void writeFile(String path, String content) {
         Path verifiedPath = fileService.getSafeWritePath(path);
+
+        FileContext ctx = fileMemoryService.get();
+        ctx.setLastOpenedFile(verifiedPath.toString());
+        ctx.getRecentFiles().add(verifiedPath.toString());
+        fileMemoryService.update(ctx);
+
+        fileSnapshotService.createSnapshot(verifiedPath.toString());
+
         try {
-            //Path p = Path.of(path);
             if (verifiedPath.getParent() != null) Files.createDirectories(verifiedPath.getParent()); //creates the full folder structure if missing  does nothing if it already exists (safe)
             Files.writeString(verifiedPath, content); //creates file if not exists and overwrites if exists
+            updateProjectIndex(
+                    verifiedPath,
+                    content
+            );
         } catch (IOException e) {
             throw new RuntimeException("Write failed");
         }
+
     }
 
     private static final long COMMAND_TIMEOUT_SECONDS = 10;
-    //private static final ExecutorService executor = Executors.newFixedThreadPool(5); //5 command output can be read at a time
+
     private String executeCommand(String cmd) {
 
         cmd = cmd.trim();
@@ -308,42 +1464,19 @@ public ChatCompletionTool buildBashToolDefinition() {
             return "Blocked: command too long.";
         }
         if(!isSafeCommand(cmd)){
-            commandApprovalService.submitCommand("user123",cmd);
+            String user = String.valueOf(auditorAwareImpl.getCurrentAuditor());
+            commandApprovalService.submitCommand(user,cmd);
             return "Not a safe command, sent for approval.";
         }
-
-//        if (cmd.contains("&&") || cmd.contains("|") || cmd.contains(";")) {
-//            return "Blocked: chained commands";
-//        }
-//        if (cmd.contains(">") || cmd.contains("<")) {
-//            return "Blocked: redirection not allowed";
-//        }
-
-        //I know only isAllowed commands will be executed but still checking
-        //just doing this to block obvious dangerous keywords
-        //String lower = cmd.toLowerCase();
-//        if (lower.contains("del ") || lower.contains("format") || lower.contains("shutdown")) {
-//            return "Blocked: dangerous command";
-//        }
-//        if (lower.contains("shutdown")) {
-//            return "Blocked: dangerous command";
-//        }
 
         try {
             String[] parts = cmd.trim().split("\\s+");
             String base = parts[0].toLowerCase();
 
-            //String base = cmd.split("\\s+")[0].replaceAll("[\"']", "").toLowerCase();
-            //String base = parts[0].replaceAll("[\"']", "").toLowerCase();
-//            if (!ALLOWED_COMMANDS.contains(base)) {
-//                return "Blocked: not allowed";
-//            }
             if (!validateArguments(base, parts)) {
                 return "Blocked: invalid arguments";
             }
-//            if (parts.length > 3) {
-//                return "Blocked: too many arguments";
-//            }
+
             Process p = new ProcessBuilder("cmd.exe", "/c", cmd)
                     .directory(ROOT.toFile()) // important, directory expects file and not a path
                     .redirectErrorStream(true)
@@ -383,25 +1516,6 @@ public ChatCompletionTool buildBashToolDefinition() {
         }
     }
 
-//    private boolean validateArguments(String base, String[] parts) {
-//
-//        switch (base) {
-//            case "echo":
-//                return true; // no validation needed
-//            case "type":
-//            case "dir":
-//            case "rename":
-//            case "del":
-//                for (int i = 1; i < parts.length; i++) {
-//                    if (!isSafePath(parts[i]) || parts[i].startsWith("/")) return false;
-//                }
-//                return true;
-//            default:
-//                return false;
-//        }
-//    }
-
-
     private boolean validateArguments(String base, String[] parts) {
 
         if (base.equals("echo")) {
@@ -425,27 +1539,6 @@ public ChatCompletionTool buildBashToolDefinition() {
                 name.matches("[a-zA-Z0-9._-]+");
     }
 
-
-    public String executeApprovedCommand(String cmd) {
-        if (cmd.contains("..") || cmd.contains(":\\") || cmd.startsWith("\\")) {
-            return "Blocked: path escape detected during approval";
-        }
-        return executeCommand(cmd);
-    }
-
-//    private boolean isSafePath(String arg) {
-//
-//        if (arg.matches("^[a-zA-Z]:\\\\.*")) return false;
-//        if (arg.contains("..")) return false;
-//        if (arg.startsWith("\\\\")) return false;
-//
-//        try {
-//            fileService.getSafeReadPath(arg);
-//        } catch (Exception e) {
-//            return false;
-//        }
-//        return true;
-//    }
     private boolean isSafePath(String arg) {
         if (arg == null || arg.isBlank()) return false;
         String normalized = arg.replace("\\", "/").trim().toLowerCase();
@@ -460,5 +1553,39 @@ public ChatCompletionTool buildBashToolDefinition() {
             return false;
         }
         return true;
+    }
+
+
+    private void updateProjectIndex(
+            Path file,
+            String content
+    ) {
+
+        ProjectSession session =
+                projectSessionService.getProject();
+
+        if (session == null) {
+            return;
+        }
+
+        Path projectRoot =
+                FileService.ROOT.resolve(
+                        session.getRootPath()
+                );
+
+        if (!file.startsWith(projectRoot)) {
+            return;
+        }
+
+        String relativePath =
+                projectRoot
+                        .relativize(file)
+                        .toString();
+
+        projectIndexService.indexFile(
+                session.getProjectId(),
+                relativePath,
+                content
+        );
     }
 }

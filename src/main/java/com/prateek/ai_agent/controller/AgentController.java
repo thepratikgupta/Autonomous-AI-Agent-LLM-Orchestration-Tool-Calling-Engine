@@ -1,15 +1,13 @@
 package com.prateek.ai_agent.controller;
 
-//public class AgentController {
-//}
-
 import com.prateek.ai_agent.dto.AgentResponseDto;
 import com.prateek.ai_agent.dto.PromptRequestDto;
+import com.prateek.ai_agent.security.AuditorAwareImpl;
+import com.prateek.ai_agent.service.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.prateek.ai_agent.service.AgentService;
-import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/agent")
@@ -17,28 +15,46 @@ import jakarta.servlet.http.HttpServletRequest;
 public class AgentController {
 
     private final AgentService agentService;
+    private final ConversationService conversationService;
+    private final UserRateLimitService userRateLimitService;
+    private final IpRateLimitService ipRateLimitService;
+    private final TokenUsageService tokenUsageService;
+    private final AuditorAwareImpl auditorAwareImpl;
 
     @PostMapping("/chat")
-    public ResponseEntity<AgentResponseDto> chat(@RequestBody PromptRequestDto request) {
+    public ResponseEntity<AgentResponseDto> chat(@RequestBody PromptRequestDto request, HttpServletRequest httpRequest) {
 
-        return ResponseEntity.ok(
-                new AgentResponseDto(
-                        agentService.processPrompt(request.getPrompt())
-                )
+        String userId = auditorAwareImpl.getCurrentAuditor().orElse("Guest User");
+        String ip = ipRateLimitService.getClientIp(httpRequest);
+
+        userRateLimitService.validate(userId);
+        ipRateLimitService.validate(ip);
+        String response = agentService.processPrompt(request.getPrompt());
+
+        tokenUsageService.validateAndConsume(
+                userId,
+                request.getPrompt(),
+                response
         );
-    }
-    @GetMapping("/chat-test")
-    public ResponseEntity<AgentResponseDto> test(
-            @RequestParam String prompt) {
 
+        conversationService.saveConveration(request.getPrompt(), response);
         return ResponseEntity.ok(
-                new AgentResponseDto(
-                        agentService.processPrompt(prompt)
-                )
+                AgentResponseDto.builder().response(response).build()
         );
     }
 }
-//can we not return response entity in case of getmapping? Also write it in same format as post
+
+//@GetMapping("/chat-test")
+//public ResponseEntity<AgentResponseDto> test(
+//        @RequestParam String prompt) {
+//
+//    return ResponseEntity.ok(
+//            new AgentResponseDto(
+//                    agentService.processPrompt(prompt)
+//            )
+//    );
+//}
+
 
 
 

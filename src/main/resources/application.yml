@@ -1,21 +1,8 @@
-#spring:
-#  data:
-#    mongodb:
-#      auto-index-creation: true
-#  mongodb:
-#    uri: mongodb://admin:password@localhost:27017/aiagent?authSource=admin
-#    #run this in docker mongo comtainer's exec tab :
-#    #mongosh -u admin -p password -authenticationDatabase admin
-
-
 logging:
   level:
     org.springframework.data.mongodb:
       core.MongoTemplate: DEBUG
 
-
-#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
-#204915941072-fckl8bu6ouj5lbq3q35ebb8k8hltns50.apps.googleusercontent.com
 spring:
   data:
     mongodb:

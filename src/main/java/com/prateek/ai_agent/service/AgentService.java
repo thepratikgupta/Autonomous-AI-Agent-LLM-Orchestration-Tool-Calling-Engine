@@ -2,9 +2,10 @@ package com.prateek.ai_agent.service;
 
 import com.openai.client.OpenAIClient;
 import com.openai.models.chat.completions.*;
+import com.prateek.ai_agent.entity.Message;
+import com.prateek.ai_agent.entity.ToolHint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,21 +15,63 @@ public class AgentService {
 
     private final OpenAIClient client;
     private final ToolService toolService;
-    private final CommandApprovalService commandApprovalService;
+    private final ConversationService conversationService;
+    private final PromptBuilderService promptBuilderService;
+    private final ToolRegistryService toolRegistryService;
+    private final ToolExecutorService toolExecutorService;
+    private final ToolRouterService toolRouterService;
+    private final ToolExamplesService toolExamplesService;
 
     public String processPrompt(String prompt) {
 
         List<ChatCompletionMessageParam> messages = new ArrayList<>();
+        List<Message> history = conversationService.applySummarizationIfNeeded();
 
-        // System + user
-        messages.add(ChatCompletionMessageParam.ofSystem(
-                com.openai.models.chat.completions.ChatCompletionSystemMessageParam.builder()
-                        .content("""
-                                You are running on Windows OS.
-                                Use safe window commands only.
-                                """)
-                        .build()
-        ));
+        messages.add(promptBuilderService.buildDeveloperPrompt());
+        messages.add(
+                ChatCompletionMessageParam.ofSystem(
+                        ChatCompletionSystemMessageParam
+                                .builder()
+                                .content(
+                                        toolExamplesService.examples()
+                                )
+                                .build()
+                )
+        );
+        ToolHint hint = toolRouterService.determineHint(prompt);
+        if (hint != null) {
+            messages.add(
+                    ChatCompletionMessageParam.ofSystem(
+                            ChatCompletionSystemMessageParam
+                                    .builder()
+                                    .content(
+                                            """
+                                            TOOL ROUTER:
+        
+                                            Suggested Tool:
+                                            %s
+        
+                                            Instructions:
+                                            %s
+                                            """
+                                                    .formatted(
+                                                            hint.getTool(),
+                                                            hint.getInstruction()
+                                                    )
+                                    )
+                                    .build()
+                    )
+            );
+        }
+
+        // MEMORY (IMPORTANT)
+        for (Message m : history) {
+            messages.add(ChatCompletionMessageParam.ofSystem(
+                    ChatCompletionSystemMessageParam.builder()
+                            .content(m.getContent())
+                            .build()
+            ));
+        }
 
         messages.add(ChatCompletionMessageParam.ofUser(
                 ChatCompletionUserMessageParam.builder()
@@ -37,20 +80,13 @@ public class AgentService {
         ));
 
         while (true) {
+            ChatCompletionCreateParams.Builder builder = ChatCompletionCreateParams.builder()
+                                                            .model("openai/gpt-oss-120b:free")
+                                                            .messages(messages);
+            toolRegistryService.getTools()
+                               .forEach(tool -> builder.addTool(tool));
 
-            ChatCompletion response = client.chat().completions().create(
-                    ChatCompletionCreateParams.builder()
-                            .model("openai/gpt-oss-120b:free")
-                            .messages(messages)
-                            .addTool(toolService.buildReadToolDefinition())
-                            .addTool(toolService.buildWriteToolDefinition())
-                            .addTool(toolService.buildBashToolDefinition())
-                            .build()
-            );
-
-//            if (response.choices().isEmpty()) { //  private val choices: JsonField<List<Choice>>,
-//                throw new RuntimeException("no choices in response");
-//            }
+            ChatCompletion response = client.chat().completions().create(builder.build());
 
             var message = response.choices().get(0).message();
 
@@ -68,7 +104,7 @@ public class AgentService {
                 String toolName = toolCall.function().name();
                 String arguments = toolCall.function().arguments();
 
-                String result =  toolService.executeToolCall(toolName, arguments);
+                String result = toolExecutorService.execute(toolName, arguments);
 
                 messages.add(ChatCompletionMessageParam.ofTool(
                         ChatCompletionToolMessageParam.builder()
@@ -77,34 +113,6 @@ public class AgentService {
                                 .build()
                 ));
             }
-//            for (var toolCall : toolCalls) {
-//                String toolName = toolCall.function().name();
-//                String arguments = toolCall.function().arguments();
-//
-//                String result;
-//                if ("Bash".equals(toolName)) {
-//                    String command = toolService.extractCommand(arguments);
-//                    if(toolService.isSafeCommand(command)){
-//                        //executing immediately
-//                        //result = toolService.executeToolCall(toolName, arguments);
-//                        result = toolService.executeApprovedCommand(arguments);
-//                    }else{
-//                        // create approval request
-//                        String userId= "user123";
-//                        commandApprovalService.submitCommand(userId,command);
-//                        result = "Command requires approval and was submitted.";
-//                    }
-//                }else{
-//                    result = toolService.executeToolCall(toolName, arguments);
-//                }
-//
-//                messages.add(ChatCompletionMessageParam.ofTool(
-//                        ChatCompletionToolMessageParam.builder()
-//                                .toolCallId(toolCall.id())
-//                                .content(result)
-//                                .build()
-//                ));
-//            }
         }
     }
 }

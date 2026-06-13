@@ -62,17 +62,10 @@ public class AdminToolService {
         }
     }
 
-
     public User makeAdmin(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.setRole(RoleType.ADMIN);
-//        //debugging
-//        System.out.println("Before: " + user.getRole());
-//        user.setRole(RoleType.ADMIN);
-//        User saved = userRepository.save(user);
-//        System.out.println("After: " + saved.getRole());
-//        //debugging
         return userRepository.save(user);
     }
 }

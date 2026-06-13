@@ -3,6 +3,7 @@ package com.prateek.ai_agent.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prateek.ai_agent.entity.CommandRequest;
 import com.prateek.ai_agent.repository.CommandRequestRepository;
+import com.prateek.ai_agent.security.AuditorAwareImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +16,12 @@ public class CommandApprovalService {
 
     private final CommandRequestRepository repository;
     private final AdminToolService adminToolService;
+    private final AuditorAwareImpl auditorAwareImpl;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    // =========================
-    // SUBMIT COMMAND
-    // =========================
 
+    // SUBMIT COMMAND
     public CommandRequest submitCommand(String userId, String command) {
 
         if (command == null || command.isBlank()) {
@@ -38,26 +38,17 @@ public class CommandApprovalService {
         return repository.save(request);
     }
 
-    // =========================
     // GET PENDING COMMANDS
-    // =========================
-
     public List<CommandRequest> getPendingCommands() {
         return repository.findByStatus("PENDING");
     }
 
-    // =========================
     // GET USER COMMANDS
-    // =========================
-
     public List<CommandRequest> getUserCommands(String userId) {
         return repository.findByUserId(userId);
     }
 
-    // =========================
     // GET SINGLE COMMAND
-    // =========================
-
     public CommandRequest getCommandById(String id) {
 
         return repository.findById(id)
@@ -65,10 +56,7 @@ public class CommandApprovalService {
                         new RuntimeException("Command not found"));
     }
 
-    // =========================
     // APPROVE COMMAND
-    // =========================
-
     public CommandRequest approveCommand(String id, String adminId) {
 
         CommandRequest request = getCommandById(id);
@@ -78,7 +66,8 @@ public class CommandApprovalService {
             );
         }
         request.setStatus("APPROVED");
-        request.setApprovedBy(adminId);
+        String user = String.valueOf(auditorAwareImpl.getCurrentAuditor());
+        request.setApprovedBy(user);
         request.setApprovedAt(Instant.now());
 
         repository.save(request);
@@ -104,10 +93,8 @@ public class CommandApprovalService {
 
         return repository.save(request);
     }
-    // =========================
-    // REJECT COMMAND
-    // =========================
 
+    // REJECT COMMAND
     public CommandRequest rejectCommand(String id,
                                         String adminId,String reason) {
 

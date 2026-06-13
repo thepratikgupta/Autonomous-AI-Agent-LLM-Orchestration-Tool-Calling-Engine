@@ -1,12 +1,11 @@
 package com.prateek.ai_agent.controller;
 
-import com.prateek.ai_agent.dto.CommandSubmitRequestDto;
 import com.prateek.ai_agent.entity.CommandRequest;
+import com.prateek.ai_agent.security.AuditorAwareImpl;
 import com.prateek.ai_agent.service.CommandApprovalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-        import java.util.List;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -15,37 +14,19 @@ import java.util.Map;
 public class CommandApprovalController {
 
     private final CommandApprovalService commandApprovalService;
+    private final AuditorAwareImpl auditorAwareImpl;
 
-    // =========================
-    // SUBMIT COMMAND
-    // =========================
-
-//    @PostMapping
-//    public CommandRequest submitCommand(@RequestBody CommandSubmitRequestDto dto) {
-//        //will replace later using JWT
-//        String userId = "user123";
-//
-//        return commandApprovalService.submitCommand(
-//                userId,
-//                dto.getCommand()
-//        );
-//    }
-
-    // =========================
     // GET MY COMMANDS
-    // =========================
 
     @GetMapping("/my")
     public List<CommandRequest> getMyCommands() {
 
-        String userId = "user123";
-
+        String userId = auditorAwareImpl.getCurrentAuditor()
+                .orElse("Guest User");
         return commandApprovalService.getUserCommands(userId);
     }
 
-    // =========================
-    // GET PENDING COMMANDS
-    // =========================
+    // GET ALL PENDING COMMANDS OF ALL USERS
 
     @GetMapping("/pending")
     public List<CommandRequest> getPendingCommands() {
@@ -53,24 +34,24 @@ public class CommandApprovalController {
         return commandApprovalService.getPendingCommands();
     }
 
-    // =========================
-    // APPROVE COMMAND
-    // =========================
+    // APPROVE A COMMAND
 
     @PostMapping("/{id}/approve")
     public CommandRequest approveCommand(@PathVariable String id) {
-        String adminId = "admin123";
+
+        String adminId = auditorAwareImpl.getCurrentAuditor()
+                .orElse("Guest User");
         return commandApprovalService.approveCommand(id, adminId);
     }
 
-    // =========================
-    // REJECT COMMAND
-    // =========================
+    // REJECT A COMMAND
 
     @PostMapping("/{id}/reject")
     public CommandRequest rejectCommand(@PathVariable String id, @RequestBody Map<String, String> body) {
 
-        String adminId = "admin123";
+        // adminId = String.valueOf(auditorAwareImpl.getCurrentAuditor());
+        String adminId = auditorAwareImpl.getCurrentAuditor()
+                .orElse("Guest User");
         return commandApprovalService.rejectCommand(
                 id,
                 adminId,
@@ -80,10 +61,7 @@ public class CommandApprovalController {
         //admin will also send JSON body : {"reason": "Dangerous filesystem access"}
     }
 
-
-    // =========================
     // GET SINGLE COMMAND
-    // =========================
 
     @GetMapping("/{id}")
     public CommandRequest getCommand(@PathVariable String id){
