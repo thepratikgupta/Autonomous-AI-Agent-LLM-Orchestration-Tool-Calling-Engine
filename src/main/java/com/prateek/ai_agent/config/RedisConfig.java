@@ -36,7 +36,7 @@ public class RedisConfig {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
-        // 👇 NEW RECOMMENDED APPROACH (NO DEPRECATED CLASS)
+        
         RedisSerializer<Object> jsonSerializer =
                 RedisSerializer.json();
 
