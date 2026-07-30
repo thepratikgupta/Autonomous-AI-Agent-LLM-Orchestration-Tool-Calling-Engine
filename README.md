@@ -1,57 +1,89 @@
-This is Version 4.0 of the project. It is a complete backend release that can be run and tested through REST APIs using Postman.
+# 🤖 Autonomous AI Coding Agent — v4.0
 
-The project is still under active development, and I am currently integrating additional services. Therefore, the repository may not always contain the latest changes from the ongoing development. However, v4.0 represents a complete and functional backend milestone.
+This is **Version 4.0** of the project. It is a complete backend release that can be run and tested through **REST APIs using Postman**.
 
-Some Features:
-Built a Spring Boot-based autonomous AI coding agent that interprets natural-language tasks and autonomously executes controlled backend tools.
+> **Note:** The project is still under active development, and I am currently integrating additional services. Therefore, the repository may not always contain the latest changes from the ongoing development. However, **v4.0 represents a complete and functional backend milestone.**
 
-Engineered a headless REST API using Java, Spring Boot, and MongoDB to support autonomous agent execution.
+---
 
-Integrated the OpenAI SDK to implement a dynamic LLM tool-calling loop, enabling the agent to select and orchestrate custom backend functions.
+## 🚀 Some Features:
 
-Implemented tools for web research, web scraping, filesystem manipulation, codebase analysis, project navigation, and controlled code modifications, and many more.
+- Built a **Spring Boot-based autonomous AI coding agent** that interprets natural-language tasks and autonomously executes controlled backend tools.
 
-Implemented AST-based code parsing, project indexing, class discovery, and method discovery to enable context-aware interaction with codebases.
+- Engineered a **headless REST API** using **Java, Spring Boot, and MongoDB** to support autonomous agent execution.
 
-Designed a secure sandboxed execution environment for filesystem and shell operations.
+- Integrated the **OpenAI SDK** to implement a dynamic **LLM tool-calling loop**, enabling the agent to select and orchestrate custom backend functions.
 
-Implemented command-risk classification and validation to restrict potentially dangerous shell commands.
+- Implemented tools for **web research, web scraping, filesystem manipulation, codebase analysis, project navigation, and controlled code modifications**, and many more.
 
-Built a custom Role-Based Access Control (RBAC) workflow where high-risk operations are placed into an approval queue for manual administrator approval.
+- Implemented **AST-based code parsing, project indexing, class discovery, and method discovery** to enable context-aware interaction with codebases.
 
-Implemented hybrid authentication using JWT and OAuth2, with Google and GitHub login support.
+- Designed a **secure sandboxed execution environment** for filesystem and shell operations.
 
-Implemented role-based authorization using Spring Security.
+- Implemented **command-risk classification and validation** to restrict potentially dangerous shell commands.
 
-Used Redis for distributed session management, IP-based rate limiting, user-based rate limiting, and daily LLM token-usage tracking.
+- Built a custom **Role-Based Access Control (RBAC)** workflow where high-risk operations are placed into an approval queue for **manual administrator approval**.
 
-Implemented MongoDB-backed conversation history, agent execution history, tool execution records, and approval workflows.
+- Implemented **hybrid authentication** using **JWT and OAuth2**, with **Google and GitHub login support**.
 
-Built a controlled multi-step agent execution workflow for planning and executing tasks using multiple backend tools.
+- Implemented **role-based authorization** using **Spring Security**.
 
-Implemented code intelligence capabilities to support class and method discovery across indexed codebases.
+- Used **Redis** for:
+  - Distributed session management
+  - IP-based rate limiting
+  - User-based rate limiting
+  - Daily LLM token-usage tracking
 
-Added sandboxed file operations and rollback capabilities for safer automated code modifications.
+- Implemented **MongoDB-backed**:
+  - Conversation history
+  - Agent execution history
+  - Tool execution records
+  - Approval workflows
 
-Documented the REST API using SpringDoc OpenAPI (Swagger) for easier API testing and integration.
+- Built a **controlled multi-step agent execution workflow** for planning and executing tasks using multiple backend tools.
 
-The backend can currently be accessed and tested through Postman.
+- Implemented **code intelligence capabilities** to support class and method discovery across indexed codebases.
 
-Tech Stack:
-Java
-Spring Boot
-Spring Security
-MongoDB
-Redis
-JWT
-OAuth2
-OpenAI SDK
-REST APIs
-AST-based Code Parsing
-SpringDoc OpenAPI / Swagger
-Docker
-Postman
-Project Goal:
-Built an agentic system that can understand a user's request, select appropriate tools, execute controlled actions, interact with a codebase, enforce security boundaries, maintain state, and verify operations.
+- Added **sandboxed file operations and rollback capabilities** for safer automated code modifications.
 
-Development is ongoing, with additional services and integrations currently being added.
+- Documented the REST API using **SpringDoc OpenAPI (Swagger)** for easier API testing and integration.
+
+- The backend can currently be accessed and tested through **Postman**.
+
+---
+
+## 🛠️ Tech Stack:
+
+| Category | Technologies |
+|---|---|
+| **Language** | Java |
+| **Backend Framework** | Spring Boot |
+| **Security** | Spring Security |
+| **Database** | MongoDB |
+| **Caching & Distributed State** | Redis |
+| **Authentication** | JWT, OAuth2 |
+| **AI Integration** | OpenAI SDK |
+| **API** | REST APIs |
+| **Code Intelligence** | AST-based Code Parsing |
+| **API Documentation** | SpringDoc OpenAPI / Swagger |
+| **Containerization** | Docker |
+| **API Testing** | Postman |
+
+---
+
+## 🎯 Project Goal:
+
+Built an **agentic system** that can:
+
+- Understand a user's request
+- Select appropriate tools
+- Execute controlled actions
+- Interact with a codebase
+- Enforce security boundaries
+- Maintain state
+- Verify operations
+
+Maintain State
+      │
+      ▼
+Verify Operations
