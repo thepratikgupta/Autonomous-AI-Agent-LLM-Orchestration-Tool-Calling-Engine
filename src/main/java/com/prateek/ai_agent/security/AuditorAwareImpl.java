@@ -1,6 +1,6 @@
 package com.prateek.ai_agent.security;
 
-import com.prateek.ai_agent.entity.User;
+import com.prateek.ai_agent.entity.Other.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;

@@ -1,7 +1,7 @@
 package com.prateek.ai_agent.config;
 
-import com.prateek.ai_agent.entity.RoleType;
-import com.prateek.ai_agent.entity.User;
+import com.prateek.ai_agent.entity.Enums.RoleType;
+import com.prateek.ai_agent.entity.Other.User;
 import com.prateek.ai_agent.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;

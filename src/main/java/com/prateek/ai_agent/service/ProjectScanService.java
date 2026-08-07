@@ -1,6 +1,8 @@
 package com.prateek.ai_agent.service;
 
-import com.prateek.ai_agent.entity.LanguageType;
+import com.prateek.ai_agent.entity.Enums.LanguageType;
+import com.prateek.ai_agent.service.ProjectIndexService.CodeIntelligenceService.LanguageDetector;
+import com.prateek.ai_agent.service.ProjectIndexService.ProjectIndexService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 @Service
@@ -22,7 +23,9 @@ public class ProjectScanService {
 
     public void scanProject(
             String projectId,
-            Path root
+            Path root,
+            String userId,
+            String conversationId
     ) throws IOException {
 
         try (Stream<Path> paths = Files.walk(root)) {
@@ -38,7 +41,9 @@ public class ProjectScanService {
                             indexService.indexFile(
                                     projectId,
                                     FileService.ROOT.relativize(path).toString(),
-                                    content
+                                    content,
+                                    userId,
+                                    conversationId
                             );
 
                         } catch (Exception e) {

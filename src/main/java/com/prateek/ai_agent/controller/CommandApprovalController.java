@@ -1,6 +1,6 @@
 package com.prateek.ai_agent.controller;
 
-import com.prateek.ai_agent.entity.CommandRequest;
+import com.prateek.ai_agent.entity.Other.CommandRequest;
 import com.prateek.ai_agent.security.AuditorAwareImpl;
 import com.prateek.ai_agent.service.CommandApprovalService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,6 @@ public class CommandApprovalController {
 
     @GetMapping("/pending")
     public List<CommandRequest> getPendingCommands() {
-
         return commandApprovalService.getPendingCommands();
     }
 

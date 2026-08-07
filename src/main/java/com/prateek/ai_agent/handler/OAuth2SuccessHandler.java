@@ -1,11 +1,11 @@
 package com.prateek.ai_agent.handler;
 
 
-import com.prateek.ai_agent.entity.RoleType;
-import com.prateek.ai_agent.entity.User;
-import com.prateek.ai_agent.service.JwtService;
-import com.prateek.ai_agent.service.SessionService;
-import com.prateek.ai_agent.service.UserService;
+import com.prateek.ai_agent.entity.Enums.RoleType;
+import com.prateek.ai_agent.entity.Other.User;
+import com.prateek.ai_agent.service.Authentication.JwtService;
+import com.prateek.ai_agent.service.Authentication.SessionService;
+import com.prateek.ai_agent.service.Authentication.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;

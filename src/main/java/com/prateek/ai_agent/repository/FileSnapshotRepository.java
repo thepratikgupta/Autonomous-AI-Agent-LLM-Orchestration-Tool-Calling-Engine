@@ -1,18 +1,27 @@
 package com.prateek.ai_agent.repository;
 
-import com.prateek.ai_agent.entity.FileSnapshot;
+import com.prateek.ai_agent.entity.RollBack.FileSnapshot;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FileSnapshotRepository extends MongoRepository<FileSnapshot,String> {
 
-    FileSnapshot findTopByFilePathOrderByCreatedAtDesc(
+    Optional<FileSnapshot>findTopByUserIdAndConversationIdAndFilePathOrderByCreatedAtDesc(
+            String userId,
+            String conversationId,
             String filePath
     );
 
-    List<FileSnapshot> findByFilePathOrderByCreatedAtDesc(
+    List<FileSnapshot>
+    findByUserIdAndConversationIdAndFilePathOrderByCreatedAtDesc(
+            String userId,
+            String conversationId,
             String filePath
     );
 
+    List<FileSnapshot> findAllByUserIdAndConversationId(String userId,String conversationId);
+
+    //String conversationId(String conversationId);
 }

@@ -1,7 +1,7 @@
 package com.prateek.ai_agent.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prateek.ai_agent.entity.CommandRequest;
+import com.prateek.ai_agent.entity.Other.CommandRequest;
 import com.prateek.ai_agent.repository.CommandRequestRepository;
 import com.prateek.ai_agent.security.AuditorAwareImpl;
 import lombok.RequiredArgsConstructor;
