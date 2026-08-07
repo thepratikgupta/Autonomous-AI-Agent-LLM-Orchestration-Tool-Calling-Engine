@@ -1,6 +1,6 @@
 package com.prateek.ai_agent.repository;
 
-import com.prateek.ai_agent.entity.User;
+import com.prateek.ai_agent.entity.Other.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;

@@ -23,6 +23,9 @@ public class FileService {
             throw new RuntimeException("Invalid sandbox root", e);
         }
     }
+    public Path getRoot() {
+        return ROOT;
+    }
 
     public Path getSafeReadPath(String filePath) {
         try {

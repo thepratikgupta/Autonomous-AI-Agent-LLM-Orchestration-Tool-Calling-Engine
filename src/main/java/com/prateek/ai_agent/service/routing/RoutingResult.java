@@ -10,7 +10,7 @@ import java.util.Set;
 public class RoutingResult {
 
     @Builder.Default
-    private Set<String> candidateTools = new LinkedHashSet<>();
+    private Set<String> candidateTools = new LinkedHashSet<>();//to preserve insertion and prevent duplicates
 
     private String reason;
 

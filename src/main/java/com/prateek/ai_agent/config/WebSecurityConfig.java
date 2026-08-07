@@ -1,7 +1,7 @@
 package com.prateek.ai_agent.config;
 
 import com.prateek.ai_agent.handler.OAuth2SuccessHandler;
-import com.prateek.ai_agent.service.JwtAuthFilter;
+import com.prateek.ai_agent.service.Authentication.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static com.prateek.ai_agent.entity.RoleType.*;
+import static com.prateek.ai_agent.entity.Enums.RoleType.*;
 
 @Configuration
 @EnableWebSecurity

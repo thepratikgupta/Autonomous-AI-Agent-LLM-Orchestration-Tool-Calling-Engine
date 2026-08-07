@@ -1,11 +1,10 @@
 package com.prateek.ai_agent.controller;
 
-import com.prateek.ai_agent.dto.LogInDto;
-import com.prateek.ai_agent.dto.LoginResponseDto;
-import com.prateek.ai_agent.dto.SignUpDto;
-import com.prateek.ai_agent.dto.UserDto;
-import com.prateek.ai_agent.service.AuthService;
-import com.prateek.ai_agent.service.UserService;
+import com.prateek.ai_agent.dto.AuthDto.LogInDto;
+import com.prateek.ai_agent.dto.AuthDto.LoginResponseDto;
+import com.prateek.ai_agent.dto.AuthDto.SignUpDto;
+import com.prateek.ai_agent.dto.AuthDto.UserDto;
+import com.prateek.ai_agent.service.Authentication.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
