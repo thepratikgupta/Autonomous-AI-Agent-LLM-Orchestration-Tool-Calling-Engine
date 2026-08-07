@@ -8,9 +8,7 @@ spring:
     mongodb:
       auto-index-creation: true
   mongodb:
-    uri: mongodb://admin:password@localhost:27017/aiagent?authSource=admin
-    #run this in docker mongo comtainer's exec tab :
-    #mongosh -u admin -p password -authenticationDatabase admin
+    uri: 
 
   security.oauth2.client:
     provider:
@@ -22,14 +20,14 @@ spring:
 
     registration:
       google:
-        client-id: 1049671618334-qp1e569lk02u8n8u5ia40qjpe6gs0f00.apps.googleusercontent.com
-        client-secret: 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
+        client-id: 
+        client-secret: 
       github:
-        client-id: Ov23liDNZOj6fRNAyIr7
-        client-secret: 7348245f6010707b73a9242b1fff741cf7bfa953
+        client-id: 
+        client-secret: 
       twitter:
-        client-id: asdlfjasldf
-        client-secret: asldfjalsdfj
+        client-id: 
+        client-secret: 
         redirect-uri: "{baseUrl}/login/oauth2/code/twitter"
         authorization-grant-type: authorization_code
         scope:
