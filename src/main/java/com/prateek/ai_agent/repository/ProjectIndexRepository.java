@@ -12,46 +12,23 @@ public interface ProjectIndexRepository extends MongoRepository<ProjectIndex, St
 
     List<ProjectIndex> findByProjectId(String projectId);
 
-//    Optional<ProjectIndex> findByProjectIdAndFilePath(
-//            String projectId,
-//            String filePath
-//    );
     Optional<ProjectIndex> findByUserIdAndConversationIdAndFilePath(
             String userId,
             String conversationId,
             String filePath
     );
 
-//    List<ProjectIndex> findByProjectIdAndClassesContaining(
-//            String projectId,
-//            String className
-//    );
-//    List<ProjectIndex> findByProjectIdAndClassesName(
-//            String projectId,
-//            String name,
-//            String userId,
-//            String conversationId
-//    );
-//    List<ProjectIndex> findByUserIdAndConversationIdAndProjectIdAndClassesName(
-//            String projectId,
-//            String name,
-//            String userId,
-//            String conversationId
-//    );
 List<ProjectIndex> findByUserIdAndConversationIdAndClassesName(
         String userId,
         String conversationId,
         String name
 );
-//    List<ProjectIndex> findByProjectIdAndMethodsName(
-//            String projectId,
-//            String methodName
-//    );
-    List<ProjectIndex> findByUserIdAndConversationIdAndMethodsName(
+
+List<ProjectIndex> findByUserIdAndConversationIdAndMethodsName(
             String userId,
             String conversationId,
             String methodName
-    );
+);
 
     void deleteByUserIdAndConversationId(String userId, String conversationId);
 
