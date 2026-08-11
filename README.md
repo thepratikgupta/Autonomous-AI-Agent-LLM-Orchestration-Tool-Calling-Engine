@@ -1,10 +1,10 @@
-# Synapse: Autonomous LLM Orchestration & Code Intelligence Engine
+# SynapseAI: Autonomous LLM Orchestration & Code Intelligence Engine
 
 ## 📖 Overview
 
-Synapse is an enterprise-grade autonomous AI orchestration backend built in Java and Spring Boot. It moves beyond standard wrapper APIs by implementing a deterministic multi-stage planning engine, abstract syntax tree (AST) code intelligence, and an embedded Lucene-based RAG (Retrieval-Augmented Generation) pipeline.
+SynapseAI is an enterprise-grade autonomous AI orchestration backend built in Java and Spring Boot. It moves beyond standard wrapper APIs by implementing a deterministic multi-stage planning engine, abstract syntax tree (AST) code intelligence, and an embedded Lucene-based RAG (Retrieval-Augmented Generation) pipeline.
 
-Designed for highly autonomous, yet safe, code generation and system interaction, Synapse features dynamic tool routing, triple-layer rate limiting, and transactional state-reversal mechanisms to ensure AI operations remain sandboxed, efficient, and secure.
+Designed for highly autonomous, yet safe, code generation and system interaction, SynapseAI features dynamic tool routing, triple-layer rate limiting, and transactional state-reversal mechanisms to ensure AI operations remain sandboxed, efficient, and secure.
 
 ---
 
