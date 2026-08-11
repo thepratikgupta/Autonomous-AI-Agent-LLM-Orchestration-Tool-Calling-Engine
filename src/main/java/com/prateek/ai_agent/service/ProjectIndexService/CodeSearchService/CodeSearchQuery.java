@@ -13,23 +13,23 @@ public class CodeSearchQuery {
 
     private String text;
 
-    private String className;///
+    private String className;
 
-    private String methodName;///
+    private String methodName;
 
-    private String variableName;///
+    private String variableName;
 
-    private String fileName;///
+    private String fileName;
 
-    private String filePath;///
+    private String filePath;
 
-    private String language;//
+    private String language;
 
-    private String packageName;///
+    private String packageName;
 
-    private String importName;///
+    private String importName;
 
-    private String methodCall;///
+    private String methodCall;
 
     private String object;///
 
