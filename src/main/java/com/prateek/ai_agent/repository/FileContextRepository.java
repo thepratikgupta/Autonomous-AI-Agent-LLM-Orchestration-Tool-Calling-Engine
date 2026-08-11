@@ -10,5 +10,4 @@ public interface FileContextRepository extends MongoRepository<FileContext, Stri
             String userId,
             String conversationId
     );
-    //void save(FileContext ctx, String userId, String conversationId);
 }
