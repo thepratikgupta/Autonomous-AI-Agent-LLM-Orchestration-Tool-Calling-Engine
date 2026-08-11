@@ -16,7 +16,7 @@ public class ObjectMetadata {
     private int lineNumber;
 
     private List<String> attributes;
-    //these 3 are for html
+    
     private String text;
 
     private String parent;
