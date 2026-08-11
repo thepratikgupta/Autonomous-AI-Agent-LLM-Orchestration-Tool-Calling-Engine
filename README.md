@@ -2,20 +2,20 @@
 
 ## 📖 Overview
 
-Synapse is an enterprise-grade autonomous AI orchestration backend built in Java and Spring Boot. It moves beyond standard wrapper APIs by implementing a deterministic multi-stage planning engine, abstract syntax tree (AST) code intelligence, and an embedded Lucene-based RAG (Retrieval-Augmented Generation) pipeline[cite: 1].
+Synapse is an enterprise-grade autonomous AI orchestration backend built in Java and Spring Boot. It moves beyond standard wrapper APIs by implementing a deterministic multi-stage planning engine, abstract syntax tree (AST) code intelligence, and an embedded Lucene-based RAG (Retrieval-Augmented Generation) pipeline.
 
-Designed for highly autonomous, yet safe, code generation and system interaction, Synapse features dynamic tool routing, triple-layer rate limiting, and transactional state-reversal mechanisms to ensure AI operations remain sandboxed, efficient, and secure[cite: 1].
+Designed for highly autonomous, yet safe, code generation and system interaction, Synapse features dynamic tool routing, triple-layer rate limiting, and transactional state-reversal mechanisms to ensure AI operations remain sandboxed, efficient, and secure.
 
 ---
 
 ## ✨ Key Features
 
-* **Multi-Tiered Cognitive Memory:** Implements both Short-Term (Session/File Context) and Long-Term (Factual/Historical) memory stores, allowing the agent to maintain deep conversational and structural context[cite: 1].
-* **Abstract Syntax Tree (AST) Parsing:** Features a custom multilingual code intelligence layer that parses Java, JavaScript, HTML, and CSS to extract structural metadata (classes, methods, variables) for the LLM[cite: 1].
-* **Embedded Lucene Search:** Utilizes Apache Lucene for localized, lightning-fast code and project indexing, providing the AI with RAG capabilities without blowing up token limits[cite: 1].
-* **Dynamic Tool Routing & Planning:** An autonomous `PlannerService` evaluates user intent, generates an `ExecutionPlan`, and dynamically routes commands to the appropriate system tools[cite: 1].
-* **Human-in-the-Loop Safety:** Built-in `CommandApprovalService` and `FileSnapshot` rollback mechanisms ensure the AI operates within strict, reversible boundaries[cite: 1].
-* **Distributed Rate Limiting:** Redis-backed multi-layered rate limiting (IP, Token, User) protects API limits and optimizes operational costs[cite: 1].
+* **Multi-Tiered Cognitive Memory:** Implements both Short-Term (Session/File Context) and Long-Term (Factual/Historical) memory stores, allowing the agent to maintain deep conversational and structural context.
+* **Abstract Syntax Tree (AST) Parsing:** Features a custom multilingual code intelligence layer that parses Java, JavaScript, HTML, and CSS to extract structural metadata (classes, methods, variables) for the LLM.
+* **Embedded Lucene Search:** Utilizes Apache Lucene for localized, lightning-fast code and project indexing, providing the AI with RAG capabilities without blowing up token limits.
+* **Dynamic Tool Routing & Planning:** An autonomous `PlannerService` evaluates user intent, generates an `ExecutionPlan`, and dynamically routes commands to the appropriate system tools.
+* **Human-in-the-Loop Safety:** Built-in `CommandApprovalService` and `FileSnapshot` rollback mechanisms ensure the AI operates within strict, reversible boundaries.
+* **Distributed Rate Limiting:** Redis-backed multi-layered rate limiting (IP, Token, User) protects API limits and optimizes operational costs.
 
 ---
 
@@ -23,7 +23,7 @@ Designed for highly autonomous, yet safe, code generation and system interaction
 
 ### 1. High-Level System Architecture
 
-The following diagram illustrates the lifecycle of a user prompt, passing through memory resolution, into the LLM planner, and out through the dynamic tool execution engine[cite: 1].
+The following diagram illustrates the lifecycle of a user prompt, passing through memory resolution, into the LLM planner, and out through the dynamic tool execution engine.
 
 ```mermaid
 graph TD
@@ -66,7 +66,7 @@ graph TD
 
 ### 2. The RAG & Cognitive Memory Pipeline
 
-Synapse manages state and context across multiple sessions, combining immediate file context with historical factual data before querying the LLM[cite: 1].
+Synapse manages state and context across multiple sessions, combining immediate file context with historical factual data before querying the LLM.
 
 ```mermaid
 graph TD
@@ -93,7 +93,7 @@ graph TD
 
 ### 3. Code Intelligence & Indexing Flow
 
-To prevent context-window exhaustion, files are dynamically routed to language-specific AST parsers. The extracted structural metadata is then indexed into Apache Lucene for semantic retrieval[cite: 1].
+To prevent context-window exhaustion, files are dynamically routed to language-specific AST parsers. The extracted structural metadata is then indexed into Apache Lucene for semantic retrieval.
 
 ```mermaid
 graph LR
@@ -116,7 +116,7 @@ graph LR
 
 ### 4. Triple-Layer Rate Limiting & Gateway
 
-API requests are strictly gated by three distinct Redis-backed limiters to protect against DDoS attacks, abuse, and API budget exhaustion[cite: 1].
+API requests are strictly gated by three distinct Redis-backed limiters to protect against DDoS attacks, abuse, and API budget exhaustion.
 
 ```mermaid
 sequenceDiagram
@@ -148,7 +148,7 @@ sequenceDiagram
 
 ### 5. AI Safety & Transactional Rollback
 
-High-risk actions generated by the AI require explicit human authorization, and system state is snapshotted before execution to ensure flawless rollbacks upon failure[cite: 1].
+High-risk actions generated by the AI require explicit human authorization, and system state is snapshotted before execution to ensure flawless rollbacks upon failure.
 
 ```mermaid
 stateDiagram-v2
@@ -234,11 +234,11 @@ To prevent LLM token exhaustion, Synapse does not blindly feed raw files to the 
 
 ## ⚙️ Configuration & Setup
 
-Because this is a complex, distributed backend service, you must configure several environment parameters before booting the application. Configuration properties are handled across `src/main/resources/application.properties` and `src/main/resources/application.yml`[cite: 1].
+Because this is a complex, distributed backend service, you must configure several environment parameters before booting the application. Configuration properties are handled across `src/main/resources/application.properties` and `src/main/resources/application.yml`.
 
 ### Step 1: Environment Variables
 
-Based on the integrated services (Redis, OpenAI, OAuth2, JWT), you need to provide the following keys in your `.properties` or `.yml` file[cite: 1]:
+Based on the integrated services (Redis, OpenAI, OAuth2, JWT), you need to provide the following keys in your `.properties` or `.yml` file:
 
 **In `application.yml` (Recommended for hierarchical structure):**
 
@@ -281,7 +281,7 @@ openai:
 
 ### Step 2: Build and Run
 
-Clone the repository and run the application using the included Maven wrapper[cite: 1]:
+Clone the repository and run the application using the included Maven wrapper:
 
 ```bash
 # Clone the project
