@@ -58,7 +58,6 @@ public class ToolService {
     private final ProjectScanService projectScanService;
     private final ProjectIndexService projectIndexService;
     private final ProjectIndexSessionService projectIndexSessionService;
-    //private final LuceneIndexService luceneIndexService;
     private final CodeSearchService codeSearchService;
 
     public ChatCompletionTool buildCodeSearchToolDefinition() {
@@ -165,8 +164,8 @@ public ChatCompletionTool buildBashToolDefinition() {
                     .build())
             .build();
 }
+    
 //ADDITIONAL TOOLS START:
-
     public ChatCompletionTool buildListFilesToolDefinition() {
         return ChatCompletionTool.builder()
                 .type(JsonValue.from("function"))
@@ -682,14 +681,11 @@ public ChatCompletionTool buildBashToolDefinition() {
                 .build();
     }
 
-//ADDITIONAL TOOLS END.
-
     //EXECUTION:
     public String executeToolCall(String name, String args,String userId, String conversationId) {
         String result;
         String status = "SUCCESS";
         long start = System.currentTimeMillis();
-//
         try{
             switch (name) {
                 case "Read":
@@ -759,11 +755,6 @@ public ChatCompletionTool buildBashToolDefinition() {
                             extractOptional(args, "path"),userId,conversationId
                     );
                     break;
-//                case "RollbackFile":
-//                    result = rollbackFile(
-//                            extract(args, "file_path"),userId,conversationId
-//                    );
-//                    break;
                 case "IndexProject":
                     String projectId = extract(args, "project_id");
                     String rootPath = extract(args, "root_path");
@@ -779,20 +770,6 @@ public ChatCompletionTool buildBashToolDefinition() {
                                             userId,
                                             conversationId, 10));
                     break;
-//                case "FindClass":
-//                    String className = extract(args, "class_name");
-//                    projectIndexSessionService.resolveProjectIndex(userId,conversationId);
-//                    result = projectIndexService
-//                            .findClass(className,userId,conversationId)
-//                            .toString();
-//                    break;
-//                case "FindMethod":
-//                    String methodName = extract(args, "method_name");
-//                    projectIndexSessionService.resolveProjectIndex(userId,conversationId);
-//                    result = formatMethodSearch(
-//                            projectIndexService.findMethod(methodName,userId,conversationId),methodName
-//                            );
-//                    break;
                 case "Bash":
                     String command = extract(args,"command");
                     result= executeCommand(command,userId,conversationId
@@ -840,17 +817,6 @@ public ChatCompletionTool buildBashToolDefinition() {
                     )
             );
         }
-//    private String id;
-//    private String projectId;
-//    private String userId;
-//    private String conversationId;
-//    private String filePath;
-//    private String fileName;
-//    private String language;
-//    private String packageName;
-//    private String checksum;
-//    private Long lastModified;
-//    private float score;
         return sb.toString();
     }
 
@@ -1108,26 +1074,7 @@ public ChatCompletionTool buildBashToolDefinition() {
 
             Files.move(src, dst, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             projectIndexSessionService.makeProjectIndexDirty(userId,conversationId);
-//            ProjectSession session = projectIndexSessionService.getProject("992528",userId,conversationId);
-//
-//            if (session != null && session.getProjectId() != null) {
-//
-//                Path projectRoot = FileService.ROOT.resolve(session.getRootPath());
-//
-//                if (src.startsWith(projectRoot)) {
-//
-//                    String oldRelativePath = projectRoot.relativize(src).toString();
-//                    String newRelativePath = projectRoot.relativize(dst).toString();
-//
-//                    projectIndexService.updateFilePath(
-//                            session.getProjectId(),
-//                            oldRelativePath,
-//                            newRelativePath,
-//                            userId,
-//                            conversationId
-//                    );
-//                }
-//            }
+
         } catch (Exception e) {
 
             throw new RuntimeException(
@@ -1277,12 +1224,7 @@ public ChatCompletionTool buildBashToolDefinition() {
             };
 
             Files.writeString(path, updated);
-//            updateProjectIndex(
-//                    path,
-//                    updated,
-//                    userId,
-//                    conversationId
-//            );
+
             projectIndexSessionService.makeProjectIndexDirty(userId, conversationId);
 
             return "Patch applied successfully";
@@ -1302,7 +1244,6 @@ public ChatCompletionTool buildBashToolDefinition() {
             } else {
                 root = fileService.getSafeReadPath(path);
             }
-            //Path root = fileService.getSafeReadPath(path);
 
             StringBuilder result = new StringBuilder();
 
@@ -1346,8 +1287,7 @@ public ChatCompletionTool buildBashToolDefinition() {
                     + e.getMessage();
         }
     }
-    //ADDITIONAL HELPERS END.
-
+    
     //HELPERS:
     private String extract(String json, String field) {
         try {
@@ -1373,7 +1313,6 @@ public ChatCompletionTool buildBashToolDefinition() {
         return extract(jsonArgs, "command");
     }
 
-    //This is ONLY command-level safety.
     public boolean isSafeCommand(String cmd) {
         String[] parts = cmd.trim().split("\\s+");
 
@@ -1395,8 +1334,7 @@ public ChatCompletionTool buildBashToolDefinition() {
 
 
         fileContextService.updateLastReadFile(verifiedPath.toString(),userId,conversationId);
-        //fileSnapshotService.createSnapshot(verifiedPath.toString());
-
+        
         try {
             return Files.readString(verifiedPath);
         } catch (IOException e) {
@@ -1408,11 +1346,10 @@ public ChatCompletionTool buildBashToolDefinition() {
         Path verifiedPath = fileService.getSafeWritePath(path);
 
         FileContext ctx = fileContextService.get(userId, conversationId);
-        //fileSnapshotService.createSnapshot(verifiedPath.toString(),userId,conversationId);
-
+     
         try {
-            if (verifiedPath.getParent() != null) Files.createDirectories(verifiedPath.getParent()); //creates the full folder structure if missing  does nothing if it already exists (safe)
-            Files.writeString(verifiedPath, content); //creates file if not exists and overwrites if exists
+            if (verifiedPath.getParent() != null) Files.createDirectories(verifiedPath.getParent());
+            Files.writeString(verifiedPath, content); 
             projectIndexSessionService.makeProjectIndexDirty(userId, conversationId);
             fileContextService.updateLastModifiedFile(verifiedPath.toString(),userId,conversationId);
         } catch (IOException e) {
@@ -1429,8 +1366,8 @@ public ChatCompletionTool buildBashToolDefinition() {
         if ((cmd.startsWith("\"") && cmd.endsWith("\"")) || (cmd.startsWith("'") && cmd.endsWith("'"))){
             cmd = cmd.substring(1, cmd.length() - 1);
         }
-        cmd = cmd.replaceAll("[\"']+$", "");// remove accidental trailing quotes
-        cmd = cmd.replaceAll("\\s+", " ").trim();// normalize whitespace
+        cmd = cmd.replaceAll("[\"']+$", "");
+        cmd = cmd.replaceAll("\\s+", " ").trim();
 
         if (cmd == null || cmd.isBlank()) {
             return "Empty command.";
@@ -1453,7 +1390,7 @@ public ChatCompletionTool buildBashToolDefinition() {
             }
 
             Process p = new ProcessBuilder("cmd.exe", "/c", cmd)
-                    .directory(ROOT.toFile()) // important, directory expects file and not a path
+                    .directory(ROOT.toFile()) 
                     .redirectErrorStream(true)
                     .start();
             System.out.println("RAW CMD: [" + cmd + "]");
@@ -1463,22 +1400,19 @@ public ChatCompletionTool buildBashToolDefinition() {
                     new String(is.readAllBytes())
             );
 
-            boolean finished = p.waitFor(COMMAND_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS); //With timeout → returns boolean
-            //Never call waitFor() without draining the process output concurrently.
+            boolean finished = p.waitFor(COMMAND_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS);
             if (!finished) {
-                p.destroyForcibly();  //request termination
-                p.waitFor(); //confirms full termination
-                futureOutput.cancel(true); // stop reader thread
+                p.destroyForcibly(); 
+                p.waitFor(); 
+                futureOutput.cancel(true); 
                 return "Command timed out after " + COMMAND_TIMEOUT_SECONDS + " seconds";
             }
 
             String output;
             try {
-                output = futureOutput.get(2, TimeUnit.SECONDS);//Output is already generated, You are just reading remaining buffered data.If it takes long → something is wrong
+                output = futureOutput.get(2, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
-                futureOutput.cancel(true); // stop reader thread
-                //Killing the process does NOT stop the thread reading its output.
-                //You must explicitly cancel the Future to stop that background thread.
+                futureOutput.cancel(true);
                 return "Output read timeout";
             }
 
@@ -1494,7 +1428,7 @@ public ChatCompletionTool buildBashToolDefinition() {
     private boolean validateArguments(String base, String[] parts) {
 
         if (base.equals("echo")) {
-            return true; // no validation needed
+            return true; 
         }
         if (base.equals("delete")) {
             return parts.length == 2 && isSafePath(parts[1]);
@@ -1502,7 +1436,7 @@ public ChatCompletionTool buildBashToolDefinition() {
         if (base.equals("rename")) {
             return parts.length == 3 &&
                     isSafePath(parts[1]) &&
-                    isValidFileName(parts[2]); // IMPORTANT
+                    isValidFileName(parts[2]);
         }
         for (int i = 1; i < parts.length; i++) {
             if (!isSafePath(parts[i])) return false;
@@ -1529,41 +1463,4 @@ public ChatCompletionTool buildBashToolDefinition() {
         }
         return true;
     }
-
-
-//    private void updateProjectIndex(
-//            Path file,
-//            String content,
-//            String userId,
-//            String conversationId
-//    ) {
-//
-//        ProjectSession session = projectIndexSessionService.getProject("992528",userId,conversationId);
-//
-//        if (session == null) {
-//            return;
-//        }
-//
-//        Path projectRoot =
-//                FileService.ROOT.resolve(
-//                        session.getRootPath()
-//                );
-//
-//        if (!file.startsWith(projectRoot)) {
-//            return;
-//        }
-//
-//        String relativePath =
-//                projectRoot
-//                        .relativize(file)
-//                        .toString();
-//
-//        projectIndexService.indexFile(
-//                session.getProjectId(),
-//                relativePath,
-//                content,
-//                userId,
-//                conversationId
-//        );
-//    }
 }
