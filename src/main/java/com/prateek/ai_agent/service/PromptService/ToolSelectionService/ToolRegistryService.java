@@ -32,8 +32,6 @@ public class ToolRegistryService {
                 toolService.buildBashToolDefinition(),
                 toolService.buildIndexProjectToolDefinition(),
                 toolService.buildCodeSearchToolDefinition()
-                //toolService.buildFindClassToolDefinition(),
-                //toolService.buildFindMethodToolDefinition()
         );
     }
 }
