@@ -78,7 +78,6 @@ public class CommandApprovalService {
                     java.util.Map.of("command", request.getCommand())
             );
 
-            //String output = toolService.executeToolCall("Bash", toolArgs);
             String output = adminToolService.executeApprovedCommand(request.getCommand());
             request.setOutput(output);
             request.setExecutedAt(Instant.now());
