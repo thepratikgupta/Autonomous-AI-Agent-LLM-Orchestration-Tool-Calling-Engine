@@ -6,7 +6,6 @@ import com.prateek.ai_agent.service.ProjectIndexService.ProjectIndexService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -38,7 +37,7 @@ public class ProjectIndexSessionService {
                 ), Duration.ofHours(24)
         );
     }
-    //hardcoded project id to check getProject as 992528
+    
     public ProjectSession getProject(String userId, String conversationId) {
         return (ProjectSession) redisTemplate.opsForValue().get(key(userId,conversationId));
     }
@@ -55,7 +54,7 @@ public class ProjectIndexSessionService {
                 p.getLastIndexedAt(),
                 true
         );
-        //redisTemplate.opsForValue().set(key(userId, conversationId), p);
+        
     }
     public void resolveProjectIndex(String userId, String conversationId) throws IOException {
         ProjectSession p = getProject(userId, conversationId);
@@ -92,39 +91,3 @@ public class ProjectIndexSessionService {
 
     }
 }
-
-
-//package com.prateek.ai_agent.service;
-//
-//import com.prateek.ai_agent.entity.Memory.ShortTermMemory.CodeMetaData.ProjectSession;
-//import com.prateek.ai_agent.security.AuditorAwareImpl;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.data.redis.core.RedisTemplate;
-//import org.springframework.stereotype.Service;
-//
-//@Service
-//@RequiredArgsConstructor
-//public class ProjectIndexSessionService {
-//
-//    private final RedisTemplate<String,Object> redisTemplate;
-//
-//    private String key(String projectId, String userId, String conversationId) {
-//        //String user = auditor.getCurrentAuditor().orElse("guest");
-//        return "projectSession:" + userId + ":" + conversationId + ":" + projectId;
-//    }
-//
-//    public void setProject(String projectId, String rootPath,String userId,String conversationId) {
-//        redisTemplate.opsForValue().set(
-//                key(projectId,userId,conversationId), new ProjectSession(
-//                        projectId,
-//                        rootPath,
-//                        userId,
-//                        conversationId)
-//        );
-//    }
-//    //hardcoded project id to check getProject as 992528
-//    public ProjectSession getProject(String projectId,String userId, String conversationId) {
-//
-//        return (ProjectSession) redisTemplate.opsForValue().get(key(projectId,userId,conversationId));
-//    }
-//}
