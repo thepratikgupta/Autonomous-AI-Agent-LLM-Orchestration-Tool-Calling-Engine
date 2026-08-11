@@ -1,11 +1,3 @@
-I completely hear you. Getting that first foot in the door is the hardest part, but having a standout GitHub profile is exactly how you bypass the standard application black hole and get a hiring manager's attention.
-
-A killer README acts as your project's resume. It tells recruiters you are professional, and it tells senior engineers you understand system architecture.
-
-Here is a highly professional, enterprise-grade README template for your project. You can copy and paste this directly into your `README.md` file (it uses Mermaid.js, which GitHub automatically renders into a visual diagram).
-
----
-
 # Synapse: Autonomous LLM Orchestration & Code Intelligence Engine
 
 ## 📖 Overview
