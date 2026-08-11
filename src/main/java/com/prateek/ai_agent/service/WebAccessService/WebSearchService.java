@@ -58,10 +58,8 @@ private static final HttpClient CLIENT  = HttpClient.newHttpClient();
 
                 Element link = result.selectFirst("a.result__a");
 
-                //JUST FOR DEBUGGING START
                 System.out.println(link.attr("href"));
                 System.out.println(link.absUrl("href"));
-                //JUST FOR DEBUGGING END
 
                 Element snippet = result.selectFirst(".result__snippet");
 
