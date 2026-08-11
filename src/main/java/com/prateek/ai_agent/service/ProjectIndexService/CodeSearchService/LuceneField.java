@@ -13,7 +13,6 @@ public final class LuceneField {
     public static final String LANGUAGE = "language";
     public static final String PACKAGE_NAME = "packageName";
 
-    //Searchable symbol fields
     public static final String CLASS_NAMES = "classNames";
     public static final String METHOD_NAMES = "methodNames";
     public static final String VARIABLE_NAMES = "variableNames";
@@ -23,10 +22,8 @@ public final class LuceneField {
     public static final String CSS_SELECTORS = "cssSelectors";
     public static final String CSS_VARIABLES = "cssVariables";
 
-    //Full text representation.
     public static final String CONTENT = "content";
 
-    //Metadata synchronization.
     public static final String CHECKSUM = "checksum";
     public static final String LAST_MODIFIED = "lastModified";
 }
