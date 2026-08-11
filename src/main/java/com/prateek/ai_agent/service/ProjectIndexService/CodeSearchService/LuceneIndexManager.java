@@ -12,7 +12,6 @@ import java.nio.file.Path;
 @Service
 public class LuceneIndexManager {
 
-    //private static final Path BASE_INDEX_PATH = Paths.get("lucene-index");
     private final Path baseIndexPath;
 
     public LuceneIndexManager(@Value("${code-search.lucene.base-path:./data/lucene}") String basePath) {
@@ -23,14 +22,14 @@ public class LuceneIndexManager {
 
         Path indexPath = getIndexPath(userId, conversationId);
         Files.createDirectories(indexPath);
-        //DEBUGGING
+        
         System.out.println("==============================================");
         System.out.println("LUCENE INDEX PATH = " + indexPath.toAbsolutePath());
         System.out.println("USER ID = " + userId);
         System.out.println("CONVERSATION ID = " + conversationId);
         System.out.println("INDEX EXISTS = " + Files.exists(indexPath));
         System.out.println("==============================================");
-        //DEBUGGING
+        
         return FSDirectory.open(indexPath);
     }
 
