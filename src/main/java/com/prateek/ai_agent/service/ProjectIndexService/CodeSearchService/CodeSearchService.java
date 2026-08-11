@@ -25,14 +25,12 @@ public class CodeSearchService {
         this.queryParser = queryParser;
     }
 
-    // existing methods...
     public List<CodeSearchResult> structuredSearch(
             String queryText, String userId, String conversationId, int maxResults
     ){
         validateSearchRequest(queryText, userId, conversationId, maxResults);
         CodeSearchQuery searchQuery = queryParser.parse(queryText);
 
-        //DEBUGGING
         System.out.println("==============================================");
         System.out.println("CODE SEARCH REQUEST");
         System.out.println("queryText = " + queryText);
@@ -41,7 +39,6 @@ public class CodeSearchService {
         System.out.println("parsed text = " + searchQuery.getText());
         System.out.println("parsed className = " + searchQuery.getClassName());
         System.out.println("==============================================");
-        //DEBUGGING
 
         try(Directory directory = luceneIndexManager.openIndex(userId, conversationId)){
 
@@ -58,16 +55,13 @@ public class CodeSearchService {
                 System.out.println("LUCENE QUERY = " + query);
                 TopDocs topDocs = searcher.search(query, maxResults);
 
-                //DEBUGGING
                 System.out.println("LUCENE TOTAL HITS = " + topDocs.totalHits.value());
                 System.out.println("LUCENE RETURNED HITS = " + topDocs.scoreDocs.length);
-                //DEBUGGING
 
                 List<CodeSearchResult> results = new ArrayList<>();
 
                 for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
 
-                    //Document document = searcher.doc(scoreDoc.doc);
                     Document document = reader.storedFields().document(scoreDoc.doc);
                     results.add(toSearchResult(document, scoreDoc.score));
                 }
