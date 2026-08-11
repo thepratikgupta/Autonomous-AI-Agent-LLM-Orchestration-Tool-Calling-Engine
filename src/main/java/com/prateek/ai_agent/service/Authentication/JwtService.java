@@ -79,15 +79,4 @@ public class JwtService {
         }
         return claims.getSubject();
     }
-
-
-
-//    public String getUserIdFromToken(String token) {
-//        Claims claims = Jwts.parser()
-//                .verifyWith(getSecretKey())
-//                .build()
-//                .parseSignedClaims(token)
-//                .getPayload();
-//        return (claims.getSubject()); //this will give userId bcoz we passed userID above
-//    }
 }
