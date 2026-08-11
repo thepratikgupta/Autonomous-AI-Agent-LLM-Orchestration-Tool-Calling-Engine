@@ -72,11 +72,9 @@ public class ConversationContextService {
             return history;
         }
 
-        //Splitted messages to old and new messages
         List<Message> oldMessages = history.subList(0, history.size() - 20);
         List<Message> recentMessages = history.subList(history.size() - 20, history.size());
 
-        //Prompt for building summary
         StringBuilder sb = new StringBuilder();
 
         sb.append("Summarize the following conversation clearly:\n\n");
@@ -90,22 +88,16 @@ public class ConversationContextService {
 
         String summaryPrompt = sb.toString();
 
-        //Calling LLM for summary
         String summary = generateSummary(summaryPrompt);
 
-        //summary of message
         Message summaryMessage = new Message();
         summaryMessage.setSentBy("System");
         summaryMessage.setContent("Conversation Summary: " + summary);
 
-        //final trimmed history
         List<Message> newHistory = new ArrayList<>();
         newHistory.add(summaryMessage);
         newHistory.addAll(recentMessages);
 
-        //updating the conversation repository
-        //String userId = auditorAwareImpl.getCurrentAuditor().orElse("Guest User");
-//        Conversation c =conversationRepository.findByUserIdAndConversationId(userId,conversationId).orElse(null);
         Conversation c = conversationRepository
                 .findByUserIdAndConversationId(userId, conversationId)
                 .orElseThrow(() ->
@@ -114,7 +106,6 @@ public class ConversationContextService {
         c.getMessages().clear();
         c.setMessages(newHistory);
         conversationRepository.save(c);
-        //updated the conversation repository
 
         return newHistory;
     }
