@@ -25,7 +25,6 @@ public class HtmlCodeParser implements CodeParser {
     @Override
     public FileMetadata parse(String filePath, String content) {
 
-//        Document document = Jsoup.parse(content, filePath);
         Parser parser = Parser.htmlParser();
         parser.setTrackPosition(true);
 
