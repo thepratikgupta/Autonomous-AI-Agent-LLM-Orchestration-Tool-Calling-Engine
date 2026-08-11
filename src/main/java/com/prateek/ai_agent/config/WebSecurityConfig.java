@@ -54,22 +54,5 @@ public class WebSecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
-
-//Commented because we shifted to use custom user details service
-//    @Bean
-//    UserDetailsService myInMemoryUserDetailsService() {
-//        UserDetails adminUser = User.withUsername("admin")
-//                .password(passwordEncoder().encode("password"))
-//                .roles(ADMIN.name())
-//                .build();
-//
-//        UserDetails normalUser = User.withUsername("client")
-//                .password(passwordEncoder().encode("password"))
-//                .roles(CLIENT.name())
-//                .build();
-//
-//        return new InMemoryUserDetailsManager(adminUser, normalUser);
-//    }
-
 }
-//done
+
