@@ -51,18 +51,5 @@ public class CodeSearchDebugController {
         );
     }
 
-//    @GetMapping("/debug/code-search/count") //class:UserService
-//    public long count(
-//            @AuthenticationPrincipal UserDetails user
-//    ) {
-//
-//        String userId = user.getUsername();
-//
-//        return luceneIndexService.count(
-//                userId,
-//                conversationId
-//        );
-//    }
-
 }
 
