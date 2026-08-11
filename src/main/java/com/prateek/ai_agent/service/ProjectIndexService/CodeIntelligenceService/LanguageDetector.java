@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 public class LanguageDetector {
     public LanguageType detect(String filePath) {
 
-        //String extension = FilenameUtils.getExtension(filePath);
         int index = filePath.lastIndexOf('.');
 
         if (index == -1) {
