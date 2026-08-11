@@ -72,28 +72,10 @@ public class ProjectIndexService {
 
         Optional<ProjectIndex> existing =
                 repository.findByUserIdAndConversationIdAndFilePath(userId, conversationId, path);
-//        if(existing.isPresent()){
-//            if(existing.get().getChecksum().equals(checksum)){
-//                luceneIndexService.index(existing.get());
-//                return; //File unchanged , Don't overwrite MongoDB
-//            }
-//        }
-//        if (existing.isPresent()) {
-//            if (existing.get().getChecksum().equals(checksum)) {
-//                return;
-//            }
-//        }
-//        ProjectIndex saved = repository.save(index);
-//        luceneIndexService.index(saved);
-        //repository.save(index);
-
 
         if (existing.isPresent()) {
             ProjectIndex existingIndex = existing.get();
             if (existingIndex.getChecksum().equals(checksum)) {
-                // MongoDB already has the latest metadata.
-                // Re-indexing is safe because updateDocument()
-                // replaced the document with the same ID.
                 luceneIndexService.index(existingIndex);
                 return;
             }
@@ -139,8 +121,6 @@ public class ProjectIndexService {
         if (optional.isEmpty()) return;
 
         ProjectIndex index = optional.get();
-//        index.setFilePath(newPath);
-//        repository.save(index);
         index.setFilePath(newPath);
         ProjectIndex saved = repository.save(index);
         luceneIndexService.index(saved);
@@ -155,7 +135,7 @@ public class ProjectIndexService {
     }
 
     private String generateSummary(FileMetadata metadata) {
-        return null;//LATER ADD AI GENERATED SUMMARY
+        return null;
     }
 
     private String calculateChecksum(String content) {
