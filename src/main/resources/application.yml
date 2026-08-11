@@ -8,7 +8,7 @@ spring:
     mongodb:
       auto-index-creation: true
   mongodb:
-    uri: mongodb://admin:password@localhost:27017/aiagent?authSource=admin
+    uri:
 
   security.oauth2.client:
     provider:
