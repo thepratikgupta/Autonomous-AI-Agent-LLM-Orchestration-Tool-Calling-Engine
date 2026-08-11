@@ -15,7 +15,6 @@ public class ExecutionPlan {
 
     private String goal;
 
-//    private PlannerState state;
     private String state;
 
     private List<PlannerStep> steps;
