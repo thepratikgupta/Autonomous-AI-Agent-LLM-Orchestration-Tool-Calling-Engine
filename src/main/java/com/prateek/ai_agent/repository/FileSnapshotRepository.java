@@ -23,5 +23,4 @@ public interface FileSnapshotRepository extends MongoRepository<FileSnapshot,Str
 
     List<FileSnapshot> findAllByUserIdAndConversationId(String userId,String conversationId);
 
-    //String conversationId(String conversationId);
 }
