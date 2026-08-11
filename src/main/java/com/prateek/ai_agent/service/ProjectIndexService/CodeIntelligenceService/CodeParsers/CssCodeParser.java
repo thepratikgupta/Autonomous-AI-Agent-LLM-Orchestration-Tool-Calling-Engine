@@ -27,8 +27,6 @@ public class CssCodeParser implements CodeParser {
 
         try {
 
-            //CascadingStyleSheet css = CSSReader.readFromString(content);
-
             CSSReaderSettings settings = new CSSReaderSettings()
                     .setUseSourceLocation(true);
 
