@@ -163,21 +163,6 @@ public class PromptBuilderService {
                         .build()
         );
     }
-//
-//    public ChatCompletionMessageParam buildPlanContext(String prompt) {
-//
-//        Plan plan = plannerService.createPlan(prompt);
-//        return ChatCompletionMessageParam.ofSystem(
-//                ChatCompletionSystemMessageParam.builder()
-//                        .content(
-//                                """
-//                                Execution Plan Suggestion:
-//                                %s
-//                                """.formatted(plan.getExecutionPlan())
-//                        )
-//                        .build()
-//        );
-//    }
 
     public ChatCompletionMessageParam buildUserMessage(String prompt) {
 
