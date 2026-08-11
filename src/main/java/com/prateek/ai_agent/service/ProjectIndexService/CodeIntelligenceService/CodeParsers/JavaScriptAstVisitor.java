@@ -1,6 +1,5 @@
 package com.prateek.ai_agent.service.ProjectIndexService.CodeIntelligenceService.CodeParsers;
 
-//import com.github.javaparser.ast.ImportDeclaration;
 import com.prateek.ai_agent.entity.Memory.ShortTermMemory.CodeMetaData.*;
 import lombok.Getter;
 import org.mozilla.javascript.ast.*;
@@ -36,20 +35,7 @@ public class JavaScriptAstVisitor implements NodeVisitor {
         }
         return true;
     }
-//    private void processFunction(FunctionNode functionNode) {
-//
-//        MethodMetadata method = MethodMetadata.builder()
-//                .name(getFunctionName(functionNode))
-//                .parameters(getParameters(functionNode))
-//                .async(false)
-//                .arrowFunction(false)
-//                .exported(false)
-//                .startLine(functionNode.getLineno())
-//                .endLine(-1)
-//                .build();
-//
-//        methods.add(method);
-//    }
+
     private void processFunction(FunctionNode functionNode) {
 
         int startLine = functionNode.getLineno();
@@ -152,7 +138,7 @@ public class JavaScriptAstVisitor implements NodeVisitor {
                             .lineNumber(name.getLineno())
                             .build()
             );
-            // Object literal
+            
             if (initializerNode instanceof ObjectLiteral objectLiteral) {
                 processObjectLiteral(
                         name.getIdentifier(),
