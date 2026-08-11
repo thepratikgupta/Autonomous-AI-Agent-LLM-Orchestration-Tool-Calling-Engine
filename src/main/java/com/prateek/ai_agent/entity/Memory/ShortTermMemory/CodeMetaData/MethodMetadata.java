@@ -33,11 +33,11 @@ public class MethodMetadata {
 
     private String documentation;
 
-    //For Js
     private boolean async;
+    
     private boolean arrowFunction;
+    
     private boolean exported;
-    //
 
     private int startLine;
 
