@@ -53,16 +53,6 @@ public class AuthService {
         return new LoginResponseDto(user.getId(),accessToken,refreshToken);
     }
 
-//    public LoginResponseDto refreshToken(String refreshToken) {
-//
-//        sessionService.validateSession(refreshToken);
-//        String userId = jwtService.getUserIdFromRefreshToken(refreshToken);
-//        User user = userService.getUserById(userId);
-//
-//        String accessToken = jwtService.generateAccessToken(user);
-//        return new LoginResponseDto(userId,accessToken,refreshToken);
-//    }
-
     public LoginResponseDto refreshToken(String oldRefreshToken) {
 
         String userId = jwtService.getUserIdFromRefreshToken(oldRefreshToken);
