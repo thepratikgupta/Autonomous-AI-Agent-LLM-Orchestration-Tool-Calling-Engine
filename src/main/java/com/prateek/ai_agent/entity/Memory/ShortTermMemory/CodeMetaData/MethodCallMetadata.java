@@ -11,8 +11,6 @@ public class MethodCallMetadata {
 
     private String methodName;
 
-    // object.method()
-    // repository.save()
     private String owner;
 
     private List<String> arguments;
