@@ -23,27 +23,27 @@ public class ProjectIndex {
     @Id
     private String id;
 
-    private String userId;//
+    private String userId;
 
-    private String conversationId;//
+    private String conversationId;
 
-    private String projectId;//
+    private String projectId;
 
-    private String filePath;//
+    private String filePath;
 
-    private String fileName;//
+    private String fileName;
 
-    private LanguageType language;//
+    private LanguageType language;
 
-    private List<ClassMetadata> classes;//
+    private List<ClassMetadata> classes;
 
-    private List<MethodMetadata> methods;//
+    private List<MethodMetadata> methods;
 
-    private String packageName;//
+    private String packageName;
 
     private List<String> interfaces;
 
-    private List<VariableMetadata> variables;//
+    private List<VariableMetadata> variables;
 
     private List<ImportMetadata> imports;
 
@@ -65,7 +65,7 @@ public class ProjectIndex {
 
     private long lastModified;
 
-    private List<String> lambdaExpressions;//
+    private List<String> lambdaExpressions;
 
     private List<CssSelectorMetadata> cssSelectors;
 
