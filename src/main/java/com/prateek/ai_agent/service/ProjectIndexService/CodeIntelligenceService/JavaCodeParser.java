@@ -78,13 +78,6 @@ public class JavaCodeParser implements CodeParser {
                                 .build())
                         .toList();
 
-//        List<String> interfaces =
-//                cu.findAll(ClassOrInterfaceDeclaration.class)
-//                        .stream()
-//                        .filter(ClassOrInterfaceDeclaration::isInterface)
-//                        .map(ClassOrInterfaceDeclaration::getNameAsString)
-//                        .toList();
-
         List<VariableMetadata> fields =
                 cu.findAll(FieldDeclaration.class)
                         .stream()
@@ -199,7 +192,6 @@ public class JavaCodeParser implements CodeParser {
         List<String> constructors = cu.findAll(ConstructorDeclaration.class).stream().map(p->p.getNameAsString()).toList();
 
         List<String> enums = cu.findAll(EnumDeclaration.class).stream().map(p->p.getNameAsString()).toList();
-        //List<String> localVariables = cu.findAll(VariableDeclarator.class).stream().map(v -> v.getTypeAsString() + " " + v.getNameAsString()).toList();
         List<String> records = cu.findAll(RecordDeclaration.class).stream().map(p->p.getNameAsString()).toList();
         List<String> methodCalls = cu.findAll(MethodCallExpr.class).stream().map(MethodCallExpr::getNameAsString).toList();
         List<String> objects = cu.findAll(ObjectCreationExpr.class).stream().map(ObjectCreationExpr::getTypeAsString).toList();
