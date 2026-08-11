@@ -46,7 +46,7 @@ public class FileService {
     }
 
     public Path getSafeWritePath(String filePath) {
-        Path path = ROOT.resolve(filePath).normalize(); //not adding .toRealPath() as it requires that file must exist.
+        Path path = ROOT.resolve(filePath).normalize();
 
         if (!path.startsWith(ROOT)) {
             throw new RuntimeException("Access denied");
