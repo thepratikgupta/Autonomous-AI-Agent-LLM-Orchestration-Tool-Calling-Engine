@@ -214,6 +214,8 @@ To prevent LLM token exhaustion, Synapse does not blindly feed raw files to the 
 * **Tool Routing:** The `ToolRouterService` triggers the specific internal tool needed—whether that's searching the Lucene index, parsing an AST tree to understand a Java class, or executing a terminal command.
 * **Safety Guardrails:** Any destructive or state-altering commands are intercepted by the `CommandApprovalService` and backed up via the `FileSnapshotService` before execution.
 
+## DO READ GITHUB WIKI FOR MORE DETAILS.
+
 ## 🚀 Getting Started
 
 ### Prerequisites
