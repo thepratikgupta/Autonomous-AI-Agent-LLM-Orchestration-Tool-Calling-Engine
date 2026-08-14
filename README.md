@@ -223,7 +223,7 @@ To prevent LLM token exhaustion, Synapse does not blindly feed raw files to the 
 * Java 17 or higher
 * Maven
 * Redis (for Rate Limiting and Session Management)
-* OpenAI API Key (Suggestion: Use OpenRouter)
+* OpenAI API Key (Suggested: Use OpenRouter)
 
 ## 🛠️ Core Technology Stack
 
