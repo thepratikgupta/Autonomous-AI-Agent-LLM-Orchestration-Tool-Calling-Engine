@@ -1,6 +1,6 @@
 # SynapseAI: Autonomous LLM Orchestration & Code Intelligence Engine
 
-## 📖 Overview
+## 📖 Overview:
 
 SynapseAI is an enterprise-grade autonomous AI orchestration backend built in Java and Spring Boot. It moves beyond standard wrapper APIs by implementing a deterministic multi-stage planning engine, abstract syntax tree (AST) code intelligence, and an embedded Lucene-based RAG (Retrieval-Augmented Generation) pipeline.
 
@@ -8,7 +8,7 @@ Designed for highly autonomous, yet safe, code generation and system interaction
 
 ---
 
-## ✨ Key Features
+## ✨ Key Features:
 
 * **Multi-Tiered Cognitive Memory:** Implements both Short-Term (Session/File Context) and Long-Term (Factual/Historical) memory stores, allowing the agent to maintain deep conversational and structural context.
 * **Abstract Syntax Tree (AST) Parsing:** Features a custom multilingual code intelligence layer that parses Java, JavaScript, HTML, and CSS to extract structural metadata (classes, methods, variables) for the LLM.
@@ -19,7 +19,7 @@ Designed for highly autonomous, yet safe, code generation and system interaction
 
 ---
 
-## 🏗️ Deep Architectural Flow
+## 🏗️ Deep Architectural Flow:
 
 ### 1. High-Level System Architecture
 
@@ -182,7 +182,7 @@ stateDiagram-v2
 
 ```
 ---
-## Architectural Explanation
+## Architectural Explanation:
 
 ### -> The Planning & Orchestration Lifecycle
 
@@ -216,7 +216,7 @@ To prevent LLM token exhaustion, Synapse does not blindly feed raw files to the 
 
 ## DO READ GITHUB WIKI FOR MORE DETAILS.
 
-## 🚀 Getting Started
+## 🚀 Getting Started:
 
 ### Prerequisites
 
@@ -234,7 +234,7 @@ To prevent LLM token exhaustion, Synapse does not blindly feed raw files to the 
 * **Caching & Limits:** Redis
 * **Web Intelligence:** Using custom tools like `BrowserTool`, `WebSearchTool`
 
-## ⚙️ Configuration & Setup
+## ⚙️ Configuration & Setup:
 
 Because this is a complex, distributed backend service, you must configure several environment parameters before booting the application. Configuration properties are handled across `src/main/resources/application.properties` and `src/main/resources/application.yml`.
 
